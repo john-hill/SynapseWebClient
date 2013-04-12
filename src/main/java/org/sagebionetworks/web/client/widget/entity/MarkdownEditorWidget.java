@@ -33,6 +33,7 @@ import com.extjs.gxt.ui.client.widget.menu.MenuItem;
 import com.extjs.gxt.ui.client.widget.menu.SeparatorMenuItem;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.inject.client.AsyncProvider;
 import com.google.gwt.resources.client.ImageResource;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.rpc.AsyncCallback;
@@ -58,7 +59,7 @@ public class MarkdownEditorWidget extends LayoutContainer {
 	private SynapseJSNIUtils synapseJSNIUtils;
 	private WidgetRegistrar widgetRegistrar;
 	private IconsImageBundle iconsImageBundle;
-	BaseEditWidgetDescriptorPresenter widgetDescriptorEditor;
+	AsyncProvider<BaseEditWidgetDescriptorPresenter> widgetDescriptorEditor;
 	CookieProvider cookies;
 	private TextArea markdownTextArea;
 	private HTML descriptionFormatInfo;
@@ -78,7 +79,7 @@ public class MarkdownEditorWidget extends LayoutContainer {
 	
 	
 	@Inject
-	public MarkdownEditorWidget(SynapseClientAsync synapseClient, SynapseJSNIUtils synapseJSNIUtils, WidgetRegistrar widgetRegistrar, IconsImageBundle iconsImageBundle, BaseEditWidgetDescriptorPresenter widgetDescriptorEditor, CookieProvider cookies) {
+	public MarkdownEditorWidget(SynapseClientAsync synapseClient, SynapseJSNIUtils synapseJSNIUtils, WidgetRegistrar widgetRegistrar, IconsImageBundle iconsImageBundle, AsyncProvider<BaseEditWidgetDescriptorPresenter> widgetDescriptorEditor, CookieProvider cookies) {
 		super();
 		this.synapseClient = synapseClient;
 		this.synapseJSNIUtils = synapseJSNIUtils;
@@ -383,16 +384,31 @@ public class MarkdownEditorWidget extends LayoutContainer {
 	    return menu;
 	  }
 	
-	public void handleInsertWidgetCommand(String contentTypeKey, final WidgetDescriptorUpdatedHandler callback){
-		BaseEditWidgetDescriptorPresenter.editNewWidget(widgetDescriptorEditor, wikiKey, contentTypeKey, new WidgetDescriptorUpdatedHandler() {
+	public void handleInsertWidgetCommand(final String contentTypeKey, final WidgetDescriptorUpdatedHandler callback){
+		
+		widgetDescriptorEditor.get(new AsyncCallback<BaseEditWidgetDescriptorPresenter>() {
+			
 			@Override
-		public void onUpdate(WidgetDescriptorUpdatedEvent event) {
-			if (event.getInsertValue()!=null) {
-				insertMarkdown(event.getInsertValue());
+			public void onSuccess(BaseEditWidgetDescriptorPresenter result) {
+				
+				BaseEditWidgetDescriptorPresenter.editNewWidget(result, wikiKey, contentTypeKey, new WidgetDescriptorUpdatedHandler() {
+					@Override
+				public void onUpdate(WidgetDescriptorUpdatedEvent event) {
+					if (event.getInsertValue()!=null) {
+						insertMarkdown(event.getInsertValue());
+					}
+					callback.onUpdate(event);
+				}
+				}, isWikiEditor);
+				
 			}
-			callback.onUpdate(event);
-		}
-		}, isWikiEditor);
+			
+			@Override
+			public void onFailure(Throwable caught) {
+				showErrorMessage(caught.getMessage());
+			}
+		});
+
 	}
 	
 	public void insertMarkdown(String md) {

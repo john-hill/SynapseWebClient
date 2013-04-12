@@ -76,8 +76,7 @@ public class EntityPageTopTest {
 				mockSchemaCache,
 				mockEntityTypeProvider,
 				mockIconsImageBundle, 
-				mockWidgetRegistrar, 
-				mockEventBus, new JSONObjectAdapterImpl());
+				mockEventBus);
 		
 		// Setup the the entity
 		entity = new ExampleEntity();

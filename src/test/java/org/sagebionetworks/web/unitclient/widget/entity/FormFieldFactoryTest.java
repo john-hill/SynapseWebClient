@@ -1,5 +1,6 @@
 package org.sagebionetworks.web.unitclient.widget.entity;
 
+import java.util.HashSet;
 import java.util.Set;
 
 import org.junit.Before;
@@ -13,9 +14,6 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.AdapterFactoryImpl;
 import org.sagebionetworks.web.client.EntitySchemaCache;
 import org.sagebionetworks.web.client.EntitySchemaCacheImpl;
-import org.sagebionetworks.web.client.transform.JSONEntityFactoryImpl;
-
-import com.google.gwt.dev.util.collect.HashSet;
 
 /**
  * Test for the FormFieldFactory.

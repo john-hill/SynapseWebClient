@@ -13,14 +13,11 @@ import org.sagebionetworks.web.client.widget.entity.dialog.NameAndDescriptionEdi
 import org.sagebionetworks.web.client.widget.entity.dialog.NameAndDescriptionEditorDialog.Callback;
 import org.sagebionetworks.web.client.widget.entity.renderer.EntityListRenderer;
 
-import com.extjs.gxt.ui.client.Style.HorizontalAlignment;
 import com.extjs.gxt.ui.client.event.ButtonEvent;
 import com.extjs.gxt.ui.client.event.SelectionListener;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
 import com.extjs.gxt.ui.client.widget.Window;
 import com.extjs.gxt.ui.client.widget.button.Button;
-import com.extjs.gxt.ui.client.widget.layout.FitData;
-import com.extjs.gxt.ui.client.widget.layout.FitLayout;
 import com.extjs.gxt.ui.client.widget.layout.MarginData;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;

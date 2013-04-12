@@ -15,11 +15,8 @@ import org.sagebionetworks.web.client.events.AttachmentSelectedHandler;
 import org.sagebionetworks.web.client.events.EntityUpdatedEvent;
 import org.sagebionetworks.web.client.events.WidgetDescriptorUpdatedEvent;
 import org.sagebionetworks.web.client.events.WidgetDescriptorUpdatedHandler;
-import org.sagebionetworks.web.client.presenter.BaseEditWidgetDescriptorPresenter;
 import org.sagebionetworks.web.client.security.AuthenticationController;
-import org.sagebionetworks.web.client.transform.NodeModelCreator;
 import org.sagebionetworks.web.client.widget.SynapseWidgetPresenter;
-import org.sagebionetworks.web.client.widget.entity.registration.WidgetRegistrar;
 
 import com.google.gwt.event.shared.EventBus;
 import com.google.gwt.event.shared.HandlerManager;
@@ -33,15 +30,12 @@ public class Attachments implements AttachmentsView.Presenter,
 	private AttachmentsView view;
 	private SynapseClientAsync synapseClient;
 	private GlobalApplicationState globalApplicationState;
-	private NodeModelCreator nodeModelCreator;
 	private AuthenticationController authenticationController;
 	private JSONObjectAdapter jsonObjectAdapter;
 	private EventBus bus;
 	private HandlerManager handlerManager;
-	private WidgetRegistrar widgetRegistrar;
 	private Entity entity;
 	private boolean isEmpty = true;
-	private BaseEditWidgetDescriptorPresenter widgetEditor;
 	private String baseUrl;
 	private boolean widgetAttachments;
 	
@@ -49,19 +43,14 @@ public class Attachments implements AttachmentsView.Presenter,
 	public Attachments(AttachmentsView view, SynapseClientAsync synapseClient,
 			GlobalApplicationState globalApplicationState,
 			AuthenticationController authenticationController,
-			NodeModelCreator nodeModelCreator,
 			JSONObjectAdapter jsonObjectAdapter,
-			EventBus bus, WidgetRegistrar widgetRegistrar,
-			BaseEditWidgetDescriptorPresenter widgetEditor) {
+			EventBus bus) {
 		this.view = view;
 		this.synapseClient = synapseClient;
 		this.globalApplicationState = globalApplicationState;
 		this.authenticationController = authenticationController;
-		this.nodeModelCreator = nodeModelCreator;
 		this.jsonObjectAdapter = jsonObjectAdapter;
 		this.bus = bus;
-		this.widgetRegistrar = widgetRegistrar;
-		this.widgetEditor = widgetEditor;
 		view.setPresenter(this);
 	}
 	

@@ -25,6 +25,7 @@ import org.sagebionetworks.web.shared.exceptions.BadRequestException;
 import org.sagebionetworks.web.shared.exceptions.NotFoundException;
 import org.sagebionetworks.web.shared.exceptions.UnauthorizedException;
 
+import com.google.gwt.inject.client.AsyncProvider;
 import com.google.gwt.place.shared.Place;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
@@ -39,13 +40,13 @@ public class ActionMenu implements ActionMenuView.Presenter, SynapseWidgetPresen
 	private EntityTypeProvider entityTypeProvider;
 	private SynapseClientAsync synapseClient;
 	private JSONObjectAdapter jsonObjectAdapter;
-	private EntityEditor entityEditor;
+	private AsyncProvider<EntityEditor> entityEditor;
 	private AutoGenFactory entityFactory;
 	private boolean readOnly = false;
 	private EntityUpdatedHandler entityUpdatedHandler;
 	
 	@Inject
-	public ActionMenu(ActionMenuView view, NodeModelCreator nodeModelCreator, AuthenticationController authenticationController, EntityTypeProvider entityTypeProvider, GlobalApplicationState globalApplicationState, SynapseClientAsync synapseClient, JSONObjectAdapter jsonObjectAdapter, EntityEditor entityEditor, AutoGenFactory entityFactory) {
+	public ActionMenu(ActionMenuView view, NodeModelCreator nodeModelCreator, AuthenticationController authenticationController, EntityTypeProvider entityTypeProvider, GlobalApplicationState globalApplicationState, SynapseClientAsync synapseClient, JSONObjectAdapter jsonObjectAdapter, AsyncProvider<EntityEditor> entityEditor, AutoGenFactory entityFactory) {
 		this.view = view;
 		this.authenticationController = authenticationController;
 		this.entityTypeProvider = entityTypeProvider;
@@ -183,12 +184,35 @@ public class ActionMenu implements ActionMenuView.Presenter, SynapseWidgetPresen
 	@Override
 	public void onEdit() {
 		// Edit this entity.
-		entityEditor.editEntity(entityBundle, false);
+		entityEditor.get(new AsyncCallback<EntityEditor>() {
+			@Override
+			public void onSuccess(EntityEditor result) {
+				result.editEntity(entityBundle, false);
+			}
+			
+			@Override
+			public void onFailure(Throwable caught) {
+				view.showErrorMessage(caught.getMessage());
+			}
+		});
+
 	}
 
 	@Override
-	public void addNewChild(EntityType type, String parentId) {
-		entityEditor.addNewEntity(type, parentId);
+	public void addNewChild(final EntityType type, final String parentId) {
+		entityEditor.get(new AsyncCallback<EntityEditor>() {
+			
+			@Override
+			public void onSuccess(EntityEditor result) {
+				result.addNewEntity(type, parentId);
+			}
+			
+			@Override
+			public void onFailure(Throwable caught) {
+				view.showErrorMessage(caught.getMessage());
+			}
+		});
+
 		
 	}
 

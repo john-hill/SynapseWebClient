@@ -85,7 +85,7 @@ public class AttachmentsTest {
 		when(mockJSONObjectAdapter.createNew()).thenReturn(new JSONObjectAdapterImpl());
 		
 		// setup the entity editor with 
-		presenter = new Attachments(mockView, mockSynapseClient, mockGlobalAppState, mockAuthenticationController, mockNodeModelCreator, mockJSONObjectAdapter, mockEventBus, mockWidgetRegistrar, mockWidgetEditor);
+		presenter = new Attachments(mockView, mockSynapseClient, mockGlobalAppState, mockAuthenticationController,  mockJSONObjectAdapter, mockEventBus);
 	}
 
 	@Test

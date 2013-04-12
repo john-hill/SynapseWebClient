@@ -8,6 +8,7 @@ import static org.junit.Assert.assertTrue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
@@ -27,7 +28,6 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.AdapterFactoryImpl;
 import org.sagebionetworks.web.client.EntitySchemaCache;
 import org.sagebionetworks.web.client.EntitySchemaCacheImpl;
-import org.sagebionetworks.web.client.transform.JSONEntityFactoryImpl;
 import org.sagebionetworks.web.client.widget.entity.row.EntityRow;
 import org.sagebionetworks.web.client.widget.entity.row.EntityRowAnnotation;
 import org.sagebionetworks.web.client.widget.entity.row.EntityRowConcept;
@@ -36,7 +36,6 @@ import org.sagebionetworks.web.client.widget.entity.row.EntityRowFactory;
 import org.sagebionetworks.web.client.widget.entity.row.EntityRowListImpl;
 import org.sagebionetworks.web.client.widget.entity.row.EntityRowScalar;
 
-import com.google.gwt.dev.util.collect.HashSet;
 
 public class EntityRowFactoryTest {
 	

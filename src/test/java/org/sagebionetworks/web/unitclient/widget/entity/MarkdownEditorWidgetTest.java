@@ -18,6 +18,7 @@ import org.sagebionetworks.web.client.widget.entity.MarkdownEditorWidget;
 import org.sagebionetworks.web.client.widget.entity.registration.WidgetRegistrar;
 import org.sagebionetworks.web.test.helper.AsyncMockStubber;
 
+import com.google.gwt.inject.client.AsyncProvider;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 public class MarkdownEditorWidgetTest {
@@ -28,7 +29,7 @@ public class MarkdownEditorWidgetTest {
 	MarkdownEditorWidget presenter;
 	IconsImageBundle mockIcons;
 	CookieProvider mockCookies;
-	BaseEditWidgetDescriptorPresenter mockBaseEditWidgetPresenter;
+	AsyncProvider<BaseEditWidgetDescriptorPresenter> mockBaseEditWidgetPresenter;
 	
 	@Before
 	@Ignore
@@ -37,7 +38,7 @@ public class MarkdownEditorWidgetTest {
 		mockSynapseClient = mock(SynapseClientAsync.class);
 		mockIcons = mock(IconsImageBundle.class);
 		mockWidgetRegistrar = mock(WidgetRegistrar.class);
-		mockBaseEditWidgetPresenter = mock(BaseEditWidgetDescriptorPresenter.class);
+		mockBaseEditWidgetPresenter = mock(AsyncProvider.class);
 		mockCookies = mock(CookieProvider.class);
 		presenter = new MarkdownEditorWidget(mockSynapseClient, mockSynapseJSNIUtils, mockWidgetRegistrar, mockIcons, mockBaseEditWidgetPresenter, mockCookies);
 	}

@@ -1,10 +1,5 @@
 package org.sagebionetworks.web.client.presenter;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.sagebionetworks.repo.model.Entity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.web.client.DisplayConstants;
@@ -16,20 +11,7 @@ import org.sagebionetworks.web.client.services.LayoutServiceAsync;
 import org.sagebionetworks.web.client.transform.JsoProvider;
 import org.sagebionetworks.web.client.transform.NodeModelCreator;
 import org.sagebionetworks.web.client.view.ComingSoonView;
-import org.sagebionetworks.web.client.widget.provenance.nchart.LayoutResult;
-import org.sagebionetworks.web.client.widget.provenance.nchart.NChartCharacters;
-import org.sagebionetworks.web.client.widget.provenance.nchart.NChartLayer;
-import org.sagebionetworks.web.client.widget.provenance.nchart.NChartLayerNode;
-import org.sagebionetworks.web.client.widget.provenance.nchart.NChartLayersArray;
-import org.sagebionetworks.web.client.widget.provenance.nchart.NChartUtil;
-import org.sagebionetworks.web.client.widget.provenance.nchart.XYPoint;
 import org.sagebionetworks.web.shared.EntityWrapper;
-import org.sagebionetworks.web.shared.provenance.ActivityGraphNode;
-import org.sagebionetworks.web.shared.provenance.ActivityType;
-import org.sagebionetworks.web.shared.provenance.EntityGraphNode;
-import org.sagebionetworks.web.shared.provenance.ProvGraph;
-import org.sagebionetworks.web.shared.provenance.ProvGraphEdge;
-import org.sagebionetworks.web.shared.provenance.ProvGraphNode;
 
 import com.google.gwt.activity.shared.AbstractActivity;
 import com.google.gwt.event.shared.EventBus;
@@ -41,7 +23,6 @@ public class ComingSoonPresenter extends AbstractActivity implements ComingSoonV
 		
 	private ComingSoon place;
 	private ComingSoonView view;
-	private GlobalApplicationState globalApplicationState;
 	private SynapseClientAsync synapseClient;
 	private NodeModelCreator nodeModelCreator;
 	LayoutServiceAsync layoutService;
@@ -50,14 +31,12 @@ public class ComingSoonPresenter extends AbstractActivity implements ComingSoonV
 	
 	@Inject
 	public ComingSoonPresenter(ComingSoonView view,
-			GlobalApplicationState globalApplicationState,
 			SynapseClientAsync synapseClient,
 			NodeModelCreator nodeModelCreator,
 			LayoutServiceAsync layoutService,
 			JsoProvider jsoProvider,
 			SynapseJSNIUtils jsniUtils) {
 		this.view = view;
-		this.globalApplicationState = globalApplicationState;
 		this.synapseClient = synapseClient;
 		this.nodeModelCreator = nodeModelCreator;
 		this.layoutService = layoutService;

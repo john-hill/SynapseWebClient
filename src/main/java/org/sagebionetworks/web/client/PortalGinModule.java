@@ -8,6 +8,12 @@ import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.web.client.cookie.CookieProvider;
 import org.sagebionetworks.web.client.cookie.GWTCookieImpl;
+import org.sagebionetworks.web.client.gin.EditorFactory;
+import org.sagebionetworks.web.client.gin.EditorFactoryImpl;
+import org.sagebionetworks.web.client.gin.RendererFactory;
+import org.sagebionetworks.web.client.gin.RendererFactoryImpl;
+import org.sagebionetworks.web.client.gin.TableColumnRendererFactory;
+import org.sagebionetworks.web.client.gin.TableColumnRendererFactoryImpl;
 import org.sagebionetworks.web.client.security.AuthenticationController;
 import org.sagebionetworks.web.client.security.AuthenticationControllerImpl;
 import org.sagebionetworks.web.client.transform.JSONEntityFactory;
@@ -421,6 +427,13 @@ public class PortalGinModule extends AbstractGinModule {
 		bind(EntityMetadataViewImpl.class).in(Singleton.class);
 		bind(EntityMetadataView.class).to(EntityMetadataViewImpl.class);
 		
+		// bind the factories for Renderers and Editors
+		bind(RendererFactoryImpl.class).in(Singleton.class);
+		bind(RendererFactory.class).to(RendererFactoryImpl.class);
+		bind(EditorFactoryImpl.class).in(Singleton.class);
+		bind(EditorFactory.class).to(EditorFactoryImpl.class);
+		bind(TableColumnRendererFactoryImpl.class).in(Singleton.class);
+		bind(TableColumnRendererFactory.class).to(TableColumnRendererFactoryImpl.class);
 
 		// API Table Column manager	
 		bind(APITableColumnManagerView.class).to(APITableColumnManagerViewImpl.class);

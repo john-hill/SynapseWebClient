@@ -1,6 +1,5 @@
 package org.sagebionetworks.web.client.presenter;
 
-import org.sagebionetworks.web.client.GlobalApplicationState;
 import org.sagebionetworks.web.client.place.Governance;
 import org.sagebionetworks.web.client.view.GovernanceView;
 
@@ -13,14 +12,11 @@ public class GovernancePresenter extends AbstractActivity implements GovernanceV
 		
 	private Governance place;
 	private GovernanceView view;
-	private GlobalApplicationState globalApplicationState;
 
 	
 	@Inject
-	public GovernancePresenter(GovernanceView view, GlobalApplicationState globalApplicationState){
-		this.globalApplicationState = globalApplicationState;
+	public GovernancePresenter(GovernanceView view){
 		this.view = view;
-
 		view.setPresenter(this);
 	}
 

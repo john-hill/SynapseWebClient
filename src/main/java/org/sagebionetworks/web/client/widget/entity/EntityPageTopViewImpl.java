@@ -16,7 +16,6 @@ import org.sagebionetworks.repo.model.attachment.UploadStatus;
 import org.sagebionetworks.web.client.DisplayConstants;
 import org.sagebionetworks.web.client.DisplayUtils;
 import org.sagebionetworks.web.client.IconsImageBundle;
-import org.sagebionetworks.web.client.PortalGinInjector;
 import org.sagebionetworks.web.client.SageImageBundle;
 import org.sagebionetworks.web.client.SynapseJSNIUtils;
 import org.sagebionetworks.web.client.events.AttachmentSelectedEvent;
@@ -65,6 +64,7 @@ import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class EntityPageTopViewImpl extends Composite implements EntityPageTopView {
 
@@ -91,7 +91,7 @@ public class EntityPageTopViewImpl extends Composite implements EntityPageTopVie
 	private ActionMenu actionMenu;
 	private LocationableTitleBar locationableTitleBar;
 	private FileTitleBar fileTitleBar;
-	private PortalGinInjector ginInjector;
+	private Provider<ProvenanceWidget> ginInjector;
 	private EntityTreeBrowser entityTreeBrowser;
 	private Breadcrumb breadcrumb;
 	private PropertyWidget propertyWidget;
@@ -119,7 +119,7 @@ public class EntityPageTopViewImpl extends Composite implements EntityPageTopVie
 			PropertyWidget propertyWidget,
 			Attachments attachmentsPanel, SnapshotWidget snapshotWidget,
 			EntityMetadata entityMetadata, SynapseJSNIUtils synapseJSNIUtils,
-			PortalGinInjector ginInjector, FilesBrowser filesBrowser, MarkdownWidget markdownWidget, WikiPageWidget wikiPageWidget, PreviewWidget previewWidget) {
+			Provider<ProvenanceWidget> ginInjector, FilesBrowser filesBrowser, MarkdownWidget markdownWidget, WikiPageWidget wikiPageWidget, PreviewWidget previewWidget) {
 		this.iconsImageBundle = iconsImageBundle;
 		this.sageImageBundle = sageImageBundle;
 		this.actionMenu = actionMenu;
@@ -405,7 +405,7 @@ public class EntityPageTopViewImpl extends Composite implements EntityPageTopVie
 		
 	    // Create the property body
 	    // the headers for properties.
-		ProvenanceWidget provenanceWidget = ginInjector.getProvenanceRenderer();				
+		ProvenanceWidget provenanceWidget = ginInjector.get();				
 		provenanceWidget.setHeight(PROVENANCE_HEIGHT_PX);		
 		
 		Map<String,String> configMap = new HashMap<String,String>();

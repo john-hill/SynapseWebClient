@@ -6,7 +6,6 @@ import org.sagebionetworks.web.client.DisplayConstants;
 import org.sagebionetworks.web.client.DisplayUtils;
 import org.sagebionetworks.web.client.DisplayUtils.IconSize;
 import org.sagebionetworks.web.client.IconsImageBundle;
-import org.sagebionetworks.web.client.PortalGinInjector;
 import org.sagebionetworks.web.client.SageImageBundle;
 import org.sagebionetworks.web.client.widget.provenance.ProvenanceWidgetView.Presenter;
 import org.sagebionetworks.web.client.widget.user.UserBadge;
@@ -20,7 +19,6 @@ import org.sagebionetworks.web.shared.provenance.ProvGraphNode;
 
 import com.extjs.gxt.ui.client.Style.AnchorPosition;
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
-import com.extjs.gxt.ui.client.widget.layout.LayoutData;
 import com.extjs.gxt.ui.client.widget.layout.MarginData;
 import com.extjs.gxt.ui.client.widget.tips.ToolTipConfig;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -32,7 +30,7 @@ import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.HTML;
-import com.google.gwt.user.client.ui.Widget;
+import com.google.inject.Provider;
 
 public class ProvViewUtil {	
 	
@@ -53,7 +51,7 @@ public class ProvViewUtil {
 	private static MarginData ACT_MARGIN_TIME = new MarginData(0, 0, 3, 10);
 	private static final MarginData ACT_MARGIN_NAME = new MarginData(5, 4, 8, 10);
 		
-	public static LayoutContainer createActivityContainer(ActivityGraphNode node, IconsImageBundle iconsImageBundle, PortalGinInjector ginInjector) {
+	public static LayoutContainer createActivityContainer(ActivityGraphNode node, IconsImageBundle iconsImageBundle, Provider<UserBadge> ginInjector) {
 		LayoutContainer container = new LayoutContainer();
 		container.setAutoHeight(true);
 		container.setAutoWidth(true);
@@ -72,7 +70,7 @@ public class ProvViewUtil {
 			if(node.getActivityName() != null) {				
 				label.add(new HTML(DisplayUtils.stubStrPartialWord(node.getActivityName(), MAX_ACT_CODE_NAME_CHAR)));
 			}
-			UserBadge badge = ginInjector.getUserBadgeWidget();
+			UserBadge badge = ginInjector.get();
 			badge.setMaxNameLength(MAX_DISPLAY_NAME_CHAR);
 			badge.configure(node.getModifiedBy());
 			HTML time = new HTML(DisplayUtils.converDataToPrettyString(node.getModifiedOn()));

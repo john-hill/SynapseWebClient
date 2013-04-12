@@ -12,7 +12,6 @@ import org.sagebionetworks.web.client.widget.header.Header;
 import org.sagebionetworks.web.client.widget.search.HomeSearchBox;
 
 import com.extjs.gxt.ui.client.widget.LayoutContainer;
-import com.extjs.gxt.ui.client.widget.VerticalPanel;
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
@@ -48,21 +47,16 @@ public class HomeViewImpl extends Composite implements HomeView {
 	private Presenter presenter;
 	private Header headerWidget;
 	private Footer footerWidget;
-	private GlobalApplicationState globalApplicationState;
-	private HomeSearchBox homeSearchBox;	
 	private MyEntitiesBrowser myEntitiesBrowser;
 	
 	@Inject
 	public HomeViewImpl(HomeViewImplUiBinder binder, Header headerWidget,
 			Footer footerWidget, IconsImageBundle icons, QueryFilter filter,
 			SageImageBundle imageBundle,
-			GlobalApplicationState globalApplicationState,
 			HomeSearchBox homeSearchBox, MyEntitiesBrowser myEntitiesBrowser) {
 		initWidget(binder.createAndBindUi(this));
 		this.headerWidget = headerWidget;
 		this.footerWidget = footerWidget;
-		this.globalApplicationState = globalApplicationState;
-		this.homeSearchBox = homeSearchBox;
 		this.myEntitiesBrowser = myEntitiesBrowser;
 		
 		header.add(headerWidget.asWidget());

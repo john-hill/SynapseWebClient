@@ -12,7 +12,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.schema.adapter.org.json.JSONObjectAdapterImpl;
-import org.sagebionetworks.web.client.PortalGinInjector;
+import org.sagebionetworks.web.client.gin.EditorFactory;
+import org.sagebionetworks.web.client.gin.RendererFactory;
 import org.sagebionetworks.web.client.transform.NodeModelCreator;
 import org.sagebionetworks.web.client.widget.entity.registration.WidgetConstants;
 import org.sagebionetworks.web.client.widget.entity.registration.WidgetRegistrarImpl;
@@ -20,15 +21,17 @@ import org.sagebionetworks.web.client.widget.entity.registration.WidgetRegistrar
 public class WidgetRegistrarImplTest {
 		
 	WidgetRegistrarImpl widgetRegistrar;
-	PortalGinInjector mockGinInjector;
+	RendererFactory mockGinInjector;
+	EditorFactory mockEditorFactory;
 	NodeModelCreator mockNodeModelCreator;
 	Map<String, String> testImageWidgetDescriptor;
 	String testFileName = "testfile.png";
 	@Before
 	public void setup(){	
-		mockGinInjector = mock(PortalGinInjector.class);
+		mockGinInjector = mock(RendererFactory.class);
 		mockNodeModelCreator = mock(NodeModelCreator.class);
-		widgetRegistrar= new WidgetRegistrarImpl(mockGinInjector,mockNodeModelCreator, new JSONObjectAdapterImpl());
+		mockEditorFactory = mock(EditorFactory.class);
+		widgetRegistrar= new WidgetRegistrarImpl(mockEditorFactory, mockGinInjector,mockNodeModelCreator, new JSONObjectAdapterImpl());
 		testImageWidgetDescriptor = new HashMap<String, String>();
 	}
 	
@@ -46,13 +49,13 @@ public class WidgetRegistrarImplTest {
 	@Test
 	public void testCreateWidgetEditors() {
 		widgetRegistrar.getWidgetEditorForWidgetDescriptor(null, WidgetConstants.YOUTUBE_CONTENT_TYPE, null, true);
-		verify(mockGinInjector).getYouTubeConfigEditor();
+		verify(mockEditorFactory).getYouTubeConfigEditor();
 		widgetRegistrar.getWidgetEditorForWidgetDescriptor(null, WidgetConstants.IMAGE_CONTENT_TYPE, null, false);
-		verify(mockGinInjector).getOldImageConfigEditor();
+		verify(mockEditorFactory).getOldImageConfigEditor();
 		widgetRegistrar.getWidgetEditorForWidgetDescriptor(null, WidgetConstants.IMAGE_CONTENT_TYPE, null, true);
-		verify(mockGinInjector).getImageConfigEditor();
+		verify(mockEditorFactory).getImageConfigEditor();
 		widgetRegistrar.getWidgetEditorForWidgetDescriptor(null, WidgetConstants.PROVENANCE_CONTENT_TYPE, null, true);
-		verify(mockGinInjector).getProvenanceConfigEditor();
+		verify(mockEditorFactory).getProvenanceConfigEditor();
 	}
 	
 	@Test

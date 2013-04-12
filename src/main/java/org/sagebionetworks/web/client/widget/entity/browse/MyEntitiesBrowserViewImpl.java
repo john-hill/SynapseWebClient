@@ -6,8 +6,6 @@ import org.sagebionetworks.repo.model.EntityHeader;
 import org.sagebionetworks.web.client.DisplayConstants;
 import org.sagebionetworks.web.client.DisplayUtils;
 import org.sagebionetworks.web.client.IconsImageBundle;
-import org.sagebionetworks.web.client.PortalGinInjector;
-import org.sagebionetworks.web.client.SageImageBundle;
 import org.sagebionetworks.web.client.events.EntitySelectedEvent;
 import org.sagebionetworks.web.client.events.EntitySelectedHandler;
 
@@ -21,6 +19,7 @@ import com.extjs.gxt.ui.client.widget.TabPanel;
 import com.google.gwt.user.client.ui.AbstractImagePrototype;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
+import com.google.inject.Provider;
 
 public class MyEntitiesBrowserViewImpl extends LayoutContainer implements MyEntitiesBrowserView {
 
@@ -28,24 +27,19 @@ public class MyEntitiesBrowserViewImpl extends LayoutContainer implements MyEnti
 	private static final int WIDTH_PX = 459;
 	
 	private Presenter presenter;
-	private SageImageBundle sageImageBundle;
 	private IconsImageBundle iconsImageBundle;
 	private EntityTreeBrowser myTreeBrowser;
 	private EntityTreeBrowser favoritesTreeBrowser;
 	private EntitySelectedHandler mySelectedHandler;
 	private EntitySelectedHandler favoritesSelectedHandler;
-	private PortalGinInjector ginInjector;
 	
 	private TabPanel panel;
 			
 	@Inject
-	public MyEntitiesBrowserViewImpl(SageImageBundle sageImageBundle,
-			IconsImageBundle iconsImageBundle, PortalGinInjector ginInjector) {
-		this.sageImageBundle = sageImageBundle;
+	public MyEntitiesBrowserViewImpl(IconsImageBundle iconsImageBundle, Provider<EntityTreeBrowser> entityTreeBrowserProvider) {
 		this.iconsImageBundle = iconsImageBundle;
-		this.myTreeBrowser = ginInjector.getEntityTreeBrowser();		
-		this.favoritesTreeBrowser = ginInjector.getEntityTreeBrowser();
-		this.ginInjector = ginInjector;
+		this.myTreeBrowser = entityTreeBrowserProvider.get();		
+		this.favoritesTreeBrowser = entityTreeBrowserProvider.get();
 	}
 	
 	@Override

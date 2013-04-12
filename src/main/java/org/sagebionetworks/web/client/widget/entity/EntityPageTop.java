@@ -4,7 +4,6 @@ import org.sagebionetworks.repo.model.EntityHeader;
 import org.sagebionetworks.repo.model.UserProfile;
 import org.sagebionetworks.repo.model.UserSessionData;
 import org.sagebionetworks.schema.ObjectSchema;
-import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.web.client.DisplayConstants;
 import org.sagebionetworks.web.client.DisplayUtils;
@@ -19,7 +18,6 @@ import org.sagebionetworks.web.client.model.EntityBundle;
 import org.sagebionetworks.web.client.security.AuthenticationController;
 import org.sagebionetworks.web.client.transform.NodeModelCreator;
 import org.sagebionetworks.web.client.widget.SynapseWidgetPresenter;
-import org.sagebionetworks.web.client.widget.entity.registration.WidgetRegistrar;
 import org.sagebionetworks.web.shared.EntityType;
 import org.sagebionetworks.web.shared.PaginatedResults;
 import org.sagebionetworks.web.shared.exceptions.UnknownErrorException;
@@ -39,13 +37,11 @@ public class EntityPageTop implements EntityPageTopView.Presenter, SynapseWidget
 	private EntitySchemaCache schemaCache;
 	private EntityTypeProvider entityTypeProvider;
 	private IconsImageBundle iconsImageBundle;
-	private WidgetRegistrar widgetRegistrar;
 	private EntityUpdatedHandler entityUpdateHandler;
 	private EntityBundle bundle;
 	private boolean readOnly;
 	private String entityTypeDisplay;
 	private EventBus bus;
-	private JSONObjectAdapter jsonObjectAdapter;
 	
 	@Inject
 	public EntityPageTop(EntityPageTopView view, 
@@ -55,8 +51,7 @@ public class EntityPageTop implements EntityPageTopView.Presenter, SynapseWidget
 			EntitySchemaCache schemaCache,
 			EntityTypeProvider entityTypeProvider,
 			IconsImageBundle iconsImageBundle,
-			WidgetRegistrar widgetRegistrar,
-			EventBus bus, JSONObjectAdapter jsonObjectAdapter) {
+			EventBus bus) {
 		this.view = view;
 		this.synapseClient = synapseClient;
 		this.nodeModelCreator = nodeModelCreator;
@@ -64,9 +59,7 @@ public class EntityPageTop implements EntityPageTopView.Presenter, SynapseWidget
 		this.schemaCache = schemaCache;
 		this.entityTypeProvider = entityTypeProvider;
 		this.iconsImageBundle = iconsImageBundle;
-		this.widgetRegistrar = widgetRegistrar;
 		this.bus = bus;
-		this.jsonObjectAdapter = jsonObjectAdapter;
 		view.setPresenter(this);
 	}
 

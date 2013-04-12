@@ -49,16 +49,14 @@ public class EntityPropertyForm implements EntityPropertyFormView.Presenter {
 	NodeModelCreator nodeModelCreator;
 	SynapseClientAsync synapseClient;
 	EntityPropertyFormView view;
-	WidgetRegistrar widgetRegistrar;
 	Callback callback;
 	
 	@Inject
-	public EntityPropertyForm(EntityPropertyFormView view, EventBus bus, NodeModelCreator nodeModelCreator, SynapseClientAsync synapseClient, SynapseJSNIUtils synapseJSNIUtils, WidgetRegistrar widgetRegistrar) {
+	public EntityPropertyForm(EntityPropertyFormView view, EventBus bus, NodeModelCreator nodeModelCreator, SynapseClientAsync synapseClient, SynapseJSNIUtils synapseJSNIUtils) {
 		this.view = view;
 		this.bus = bus;
 		this.nodeModelCreator = nodeModelCreator;
 		this.synapseClient = synapseClient;
-		this.widgetRegistrar = widgetRegistrar;
 		init();
 	}
 	
