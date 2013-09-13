@@ -1,6 +1,7 @@
 package org.sagebionetworks.web.server.servlet.filter;
 
 import java.io.IOException;
+import java.util.UUID;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
@@ -12,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 
 /**
  * Logs timing and error messages 
@@ -20,6 +22,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class TimingFilter implements Filter {
 	
+	public static final String SESSION_ID = "sessionId";
 	static private Logger log = LogManager.getLogger(TimingFilter.class);
 
 	@Override
@@ -29,6 +32,10 @@ public class TimingFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response,
 			FilterChain chain) throws IOException, ServletException {
+		
+		String sessionId = UUID.randomUUID().toString();
+		// push the session id to the logging thread context
+		ThreadContext.put(SESSION_ID, sessionId);
 		// Log the time
 		long start = System.currentTimeMillis();
 		try{

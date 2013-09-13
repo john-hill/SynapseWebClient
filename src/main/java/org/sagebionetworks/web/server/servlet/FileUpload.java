@@ -16,6 +16,7 @@ import org.apache.commons.fileupload.FileItemIterator;
 import org.apache.commons.fileupload.FileItemStream;
 import org.apache.commons.fileupload.servlet.ServletFileUpload;
 import org.sagebionetworks.client.Synapse;
+import org.sagebionetworks.client.SynapseInt;
 import org.sagebionetworks.repo.model.AccessRequirement;
 import org.sagebionetworks.repo.model.Entity;
 import org.sagebionetworks.repo.model.Locationable;
@@ -93,7 +94,7 @@ public class FileUpload extends HttpServlet {
 
 			String entityId = request.getParameter(WebConstants.ENTITY_PARAM_KEY);
 			String makeAttachment=null;
-			Synapse synapseClient=null;
+			SynapseInt synapseClient=null;
 			Entity locationable=null;
 			if (entityId!=null) {
 	            TokenProvider tokenProvider = new TokenProvider() {					

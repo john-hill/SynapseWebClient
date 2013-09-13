@@ -1,6 +1,7 @@
 package org.sagebionetworks.web.server.servlet;
 
 import org.sagebionetworks.client.Synapse;
+import org.sagebionetworks.client.SynapseInt;
 
 /**
  * Very simple implementation.
@@ -11,7 +12,7 @@ public class SynapseProviderImpl implements SynapseProvider {
 	
 
 	@Override
-	public Synapse createNewClient() {
+	public SynapseInt createNewClient() {
 		return new Synapse();
 		// ONE LINE CHANGE TO USE STUB SYNAPSE CLIENT:		
 		//return SynapseClientStubUtil.createSynapseClient();		

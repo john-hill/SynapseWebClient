@@ -18,6 +18,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.XML;
 import org.sagebionetworks.client.Synapse;
+import org.sagebionetworks.client.SynapseInt;
 import org.sagebionetworks.repo.model.AutoGenFactory;
 import org.sagebionetworks.repo.model.search.SearchResults;
 import org.sagebionetworks.repo.model.search.query.KeyValue;
@@ -100,7 +101,7 @@ public class SimpleSearchService extends HttpServlet {
 			if(offset != null) searchQuery.setStart(offset);			
 			
 			// execute query
-			Synapse synapseClient = createSynapseClient(UserDataProvider.getThreadLocalUserToken(request));
+			SynapseInt synapseClient = createSynapseClient(UserDataProvider.getThreadLocalUserToken(request));
 			
 			try {
 				SearchResults searchResults = synapseClient.search(searchQuery);
@@ -117,9 +118,9 @@ public class SimpleSearchService extends HttpServlet {
 	 * The synapse client is stateful so we must create a new one for each
 	 * request
 	 */
-	private Synapse createSynapseClient(String sessionToken) {
+	private SynapseInt createSynapseClient(String sessionToken) {
 		// Create a new syanpse
-		Synapse synapseClient = synapseProvider.createNewClient();
+		SynapseInt synapseClient = synapseProvider.createNewClient();
 		synapseClient.setSessionToken(sessionToken);
 		synapseClient.setRepositoryEndpoint(urlProvider
 				.getRepositoryServiceUrl());

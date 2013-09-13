@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.sagebionetworks.client.Synapse;
+import org.sagebionetworks.client.SynapseInt;
 import org.sagebionetworks.web.shared.NodeType;
 import org.springframework.web.client.HttpClientErrorException;
 
@@ -110,8 +111,8 @@ public class ServiceUtils {
 		return synapseClient;
 	}	
 	
-	public static Synapse createSynapseClient(SynapseProvider synapseProvider, ServiceUrlProvider urlProvider, String sessionToken) {
-		Synapse client = synapseProvider.createNewClient();
+	public static SynapseInt createSynapseClient(SynapseProvider synapseProvider, ServiceUrlProvider urlProvider, String sessionToken) {
+		SynapseInt client = synapseProvider.createNewClient();
 		client.setAuthEndpoint(urlProvider.getPrivateAuthBaseUrl());
 		client.setRepositoryEndpoint(urlProvider.getRepositoryServiceUrl());
 		client.setSessionToken(sessionToken);
