@@ -6,6 +6,7 @@ import org.sagebionetworks.repo.model.table.ColumnModel;
 import org.sagebionetworks.repo.model.table.RowSet;
 import org.sagebionetworks.web.client.SynapseView;
 import org.sagebionetworks.web.shared.table.v2.RowChange;
+import org.sagebionetworks.web.shared.table.v2.Sort;
 
 import com.google.gwt.user.client.ui.IsWidget;
 
@@ -42,7 +43,7 @@ public interface SimpleTableWidgetViewV2 extends IsWidget, SynapseView {
 		 * Execute the given query.
 		 * @param query
 		 */
-		public void executeQuery(String query);
+		public void executeQuery();
 		
 		/**
 		 * Add a column to the current table.
@@ -61,7 +62,7 @@ public interface SimpleTableWidgetViewV2 extends IsWidget, SynapseView {
 		 * Apply the passed RowSet as a change to the table.
 		 * @param change
 		 */
-		public void applyTableChange(List<RowChange> changes);
+		public void applyTableChange();
 		
 		/**
 		 * Cancel applying changes to a table.
@@ -74,13 +75,60 @@ public interface SimpleTableWidgetViewV2 extends IsWidget, SynapseView {
 		 * @param rowIdsToRemove
 		 */
 		public void deleteRows(List<Long> rowIdsToRemove);
+		
+		/**
+		 * Load the next page.
+		 */
+		public void nextPage();
+		/**
+		 * Load the previous page.
+		 */
+		public void previousPage();
+		
+		/**
+		 * Load the last page.
+		 */
+		public void lastPage();
+		
+		/**
+		 * Load the first page.
+		 */
+		public void firstPage();
+		/**
+		 * Set the new primary sort.
+		 * @param sort
+		 */
+		public void setPrimarySort(Sort sort);
 	}
 	
 	/**
-	 * Set the query string to be displayed.
-	 * 
-	 * @param queryString
+	 * Get the current query string.
+	 * @return
 	 */
-	public void setQueryString(String queryString);
+	public String getQueryString();
+	
+	/**
+	 * Show a query error message.
+	 * @param message
+	 */
+	public void showQueryErrorMessage(String message);
+	
+	/**
+	 * 
+	 */
+	public void clearQueryErrorMessage();
+	
+	/**
+	 * Get the current row changes.
+	 * 
+	 * @return
+	 */
+	public List<RowChange> getRowChanges();
+	
+	/**
+	 * Revert any table changes.
+	 */
+	public void cancelRowChanges();
+	
 	
 }
