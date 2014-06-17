@@ -1,9 +1,8 @@
-package org.sagebionetworks.web.client.widget.table.v2;
+package org.sagebionetworks.web.client.widget.table.entity;
 
 import java.util.List;
 
 import org.sagebionetworks.repo.model.table.ColumnModel;
-import org.sagebionetworks.repo.model.table.RowSet;
 import org.sagebionetworks.web.client.SynapseView;
 import org.sagebionetworks.web.shared.table.v2.RowChange;
 import org.sagebionetworks.web.shared.table.v2.Sort;
@@ -15,11 +14,10 @@ import com.google.gwt.user.client.ui.IsWidget;
  * Table ColumnModle CRUD, executing queries, viewing and editing query results.
  * This is the second version of the table.
  * 
- * @author dburdick (V1)
- * @author John (V2)
+ * @author John
  *
  */
-public interface SimpleTableWidgetViewV2 extends IsWidget, SynapseView {
+public interface TableEntityWidgetView extends IsWidget, SynapseView {
 
 	/**
 	 * Set the presenter.
@@ -129,6 +127,12 @@ public interface SimpleTableWidgetViewV2 extends IsWidget, SynapseView {
 	 * Revert any table changes.
 	 */
 	public void cancelRowChanges();
+
+	/**
+	 * Notify the view of the table schema.
+	 * @param schema
+	 */
+	public void setSchema(List<ColumnModel> schema);
 	
 	
 }
