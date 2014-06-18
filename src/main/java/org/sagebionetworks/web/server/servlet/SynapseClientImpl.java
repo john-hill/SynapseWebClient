@@ -2611,6 +2611,24 @@ public class SynapseClientImpl extends RemoteServiceServlet implements
 			throw new UnknownErrorException(e.getMessage());
 		}
 	}
+	
+	@Override
+	public List<String> getColumnModels(List<String> ids)
+			throws RestServiceException {
+		try {
+			org.sagebionetworks.client.SynapseClient synapseClient = createSynapseClient();
+			List<ColumnModel> columns = synapseClient.getColumnModels(ids);
+			List<String> stringList = new ArrayList<String>();
+			for(ColumnModel col : columns) {
+				stringList.add(col.writeToJSONObject(adapterFactory.createNew()).toJSONString());
+			}
+			return stringList;
+		} catch (SynapseException e) {
+			throw ExceptionUtil.convertSynapseException(e);
+		} catch (JSONObjectAdapterException e) {
+			throw new UnknownErrorException(e.getMessage());
+		}
+	}
 
 	@Override
 	public String sendMessage(Set<String> recipients, String subject, String messageBody) throws RestServiceException {
@@ -2806,5 +2824,7 @@ public class SynapseClientImpl extends RemoteServiceServlet implements
 			throw new UnknownErrorException(e.getMessage());
 		}
 	}
+
+
 	
 }

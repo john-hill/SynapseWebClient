@@ -322,6 +322,8 @@ public interface SynapseClient extends RemoteService {
 	
 	public List<String> getColumnModelsForTableEntity(String tableEntityId) throws RestServiceException;
 	
+	public List<String> getColumnModels(List<String> ids) throws RestServiceException;
+	
 	public String createColumnModel(String columnModelJson) throws RestServiceException;
 
 	public String sendMessage(Set<String> recipients, String subject, String message) throws RestServiceException;
