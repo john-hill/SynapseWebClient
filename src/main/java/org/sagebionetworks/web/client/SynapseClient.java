@@ -5,11 +5,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.sagebionetworks.client.exceptions.SynapseException;
-import org.sagebionetworks.repo.model.table.RowReferenceSet;
 import org.sagebionetworks.web.shared.AccessRequirementsTransport;
 import org.sagebionetworks.web.shared.EntityBundleTransport;
 import org.sagebionetworks.web.shared.EntityWrapper;
@@ -321,8 +319,6 @@ public interface SynapseClient extends RemoteService {
 	public String getAPIKey() throws RestServiceException;
 	
 	public List<String> getColumnModelsForTableEntity(String tableEntityId) throws RestServiceException;
-	
-	public List<String> getColumnModels(List<String> ids) throws RestServiceException;
 	
 	public String createColumnModel(String columnModelJson) throws RestServiceException;
 

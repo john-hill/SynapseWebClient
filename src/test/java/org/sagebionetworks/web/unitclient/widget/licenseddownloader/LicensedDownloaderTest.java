@@ -3,8 +3,6 @@ package org.sagebionetworks.web.unitclient.widget.licenseddownloader;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyMap;
-import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -140,7 +138,7 @@ public class LicensedDownloaderTest {
 		entity.setMd5(md5sum);
 		entity.setContentType(contentType);
 		
-		entityBundle = new EntityBundle(entity, null, null, null, null, null, null);
+		entityBundle = new EntityBundle(entity, null, null, null, null, null, null, null);
 		
 		// path for entity
 		entityPath = new EntityPath();
@@ -227,7 +225,7 @@ public class LicensedDownloaderTest {
 		entity.setId("myFileEntityId");
 		entity.setVersionNumber(4l);
 		resetMocks();
-		entityBundle = new EntityBundle(entity, null, null, null, null, null, null);
+		entityBundle = new EntityBundle(entity, null, null, null, null, null, null, null);
 		
 		// Null locations
 		resetMocks();			

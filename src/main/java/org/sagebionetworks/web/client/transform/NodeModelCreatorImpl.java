@@ -8,19 +8,16 @@ import org.sagebionetworks.repo.model.Annotations;
 import org.sagebionetworks.repo.model.BatchResults;
 import org.sagebionetworks.repo.model.Entity;
 import org.sagebionetworks.repo.model.EntityClassHelper;
-import org.sagebionetworks.repo.model.EntityHeader;
 import org.sagebionetworks.repo.model.EntityPath;
 import org.sagebionetworks.repo.model.auth.UserEntityPermissions;
 import org.sagebionetworks.repo.model.file.FileHandle;
-import org.sagebionetworks.repo.model.file.S3FileHandle;
-import org.sagebionetworks.repo.model.search.SearchResults;
+import org.sagebionetworks.repo.model.table.TableBundle;
 import org.sagebionetworks.schema.adapter.JSONArrayAdapter;
 import org.sagebionetworks.schema.adapter.JSONEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapter;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.web.client.DisplayUtils;
 import org.sagebionetworks.web.client.model.EntityBundle;
-import org.sagebionetworks.web.client.widget.provenance.nchart.LayoutResult;
 import org.sagebionetworks.web.shared.EntityBundleTransport;
 import org.sagebionetworks.web.shared.EntityTypeResponse;
 import org.sagebionetworks.web.shared.EntityWrapper;
@@ -99,6 +96,7 @@ public class NodeModelCreatorImpl implements NodeModelCreator {
 		List<AccessRequirement> accessRequirements = null;
 		List<AccessRequirement> unmetAccessRequirements = null;
 		List<FileHandle> fileHandles = null;
+		TableBundle tableBundle = null;
 		Long version = null;
 		// entity?
 		if(transport.getEntityJson() != null){
@@ -144,10 +142,14 @@ public class NodeModelCreatorImpl implements NodeModelCreator {
 				fileHandles.add((FileHandle)factory.createEntity(joa.toJSONString(), concreteClassName));
 			}
 		}
+		// Table data
+		if(transport.getTableData() != null){
+			tableBundle =  factory.createEntity(transport.getTableData() , TableBundle.class);
+		}
 		
 		// put it all together.
 		EntityBundle eb = new EntityBundle(entity, annotations, permissions,
-				path, accessRequirements, unmetAccessRequirements, fileHandles);
+				path, accessRequirements, unmetAccessRequirements, fileHandles, tableBundle);
 		// Set the child count when there.
 		if(transport.getHasChildren() != null){
 			eb.setChildCount(transport.getHasChildren());

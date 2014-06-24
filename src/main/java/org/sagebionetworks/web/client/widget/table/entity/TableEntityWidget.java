@@ -51,38 +51,9 @@ public class TableEntityWidget implements TableEntityWidgetView.Presenter, Widge
 
 	public void configure(TableEntity entity, boolean canEdit){
 		this.tableEntity = entity;
-		reloadColumnModels();
 	}
 
 
-	private void reloadColumnModels() {
-		// Lookup the column models for this table
-		if(tableEntity.getColumnIds() !=null && tableEntity.getColumnIds().size() > 0){
-			// This table has columns so fetch them
-			synapseClient.getColumnModelsForTableEntity(tableEntity.getId(), new AsyncCallback<List<String>>() {
-				@Override
-				public void onSuccess(List<String> result) {
-					try {
-						schema = new ArrayList<ColumnModel>(result.size());
-						for(String colStr : result) {
-							schema.add(new ColumnModel(adapterFactory.createNew(colStr)));
-						}
-						view.setSchema(schema);
-					} catch (JSONObjectAdapterException e) {
-						onFailure(e);
-					}
-				}
-				@Override
-				public void onFailure(Throwable caught) {
-					// There is no schema to show.
-					view.setSchema(null);
-					if(!displayUtilsContext.handleServiceException(caught, view)){
-						view.showErrorMessage(DisplayConstants.ERROR_GENERIC_RELOAD + ": " + caught.getMessage());
-					}
-				}
-			});
-		}
-	}
 	
 	@Override
 	public void executeQuery() {

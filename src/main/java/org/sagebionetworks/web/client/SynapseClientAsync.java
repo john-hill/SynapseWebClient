@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
-import org.sagebionetworks.repo.model.table.RowReferenceSet;
 import org.sagebionetworks.web.shared.AccessRequirementsTransport;
 import org.sagebionetworks.web.shared.EntityBundleTransport;
 import org.sagebionetworks.web.shared.EntityWrapper;
@@ -266,8 +265,6 @@ public interface SynapseClientAsync {
 	void getAPIKey(AsyncCallback<String> callback);
 
 	void getColumnModelsForTableEntity(String tableEntityId, AsyncCallback<List<String>> asyncCallback);
-	
-	void getColumnModels(List<String> ids, AsyncCallback<List<String>> asyncCallback);
 
 	void createColumnModel(String columnModelJson, AsyncCallback<String> callback);
 	
