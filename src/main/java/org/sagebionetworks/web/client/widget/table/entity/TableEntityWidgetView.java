@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.sagebionetworks.repo.model.table.ColumnModel;
 import org.sagebionetworks.web.client.SynapseView;
+import org.sagebionetworks.web.client.widget.WidgetRendererPresenter;
 import org.sagebionetworks.web.shared.table.v2.RowChange;
 import org.sagebionetworks.web.shared.table.v2.Sort;
 
@@ -20,23 +21,10 @@ import com.google.gwt.user.client.ui.IsWidget;
 public interface TableEntityWidgetView extends IsWidget, SynapseView {
 
 	/**
-	 * Set the presenter.
-	 * @param presenter
-	 */
-	public void setPresenter(Presenter presenter);
-
-	/**
-	 * Set the query string used by this table.
-	 * 
-	 * @param query
-	 */
-	public void setQuery(String query);
-
-	/**
 	 * The contract used by the view to interact with the presenter.
 	 *
 	 */
-	public interface Presenter {
+	public interface Presenter extends WidgetRendererPresenter {
 		/**
 		 * Execute the given query.
 		 * @param query
@@ -133,6 +121,19 @@ public interface TableEntityWidgetView extends IsWidget, SynapseView {
 	 * @param schema
 	 */
 	public void setSchema(List<ColumnModel> schema);
+	
+	/**
+	 * Set the presenter.
+	 * @param presenter
+	 */
+	public void setPresenter(Presenter presenter);
+
+	/**
+	 * Set the query string used by this table.
+	 * 
+	 * @param query
+	 */
+	public void setQuery(String query);
 	
 	
 }

@@ -337,4 +337,13 @@ public interface SynapseClient extends RemoteService {
 	public String deleteRowsFromTable(String toDelete) throws RestServiceException;
 	
 	public String getTableFileHandle(String fileHandlesToFindRowReferenceSet) throws RestServiceException;
+
+	/**
+	 * Create a new ColumnModel and add it a table entity.
+	 * @param tableEntityJson
+	 * @param columnModelJson
+	 * @return The JSON of the updated EntityBundle.
+	 * @throws RestServiceException 
+	 */
+	public EntityBundleTransport createColumnModelAndAddToTable(String tableEntity, String columnModelJson) throws RestServiceException;
 }

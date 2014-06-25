@@ -11,8 +11,10 @@ import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
 import org.sagebionetworks.web.client.DispalyUtilsContext;
 import org.sagebionetworks.web.client.DisplayConstants;
 import org.sagebionetworks.web.client.SynapseClientAsync;
+import org.sagebionetworks.web.client.model.EntityBundle;
 import org.sagebionetworks.web.client.utils.Callback;
 import org.sagebionetworks.web.client.widget.WidgetRendererPresenter;
+import org.sagebionetworks.web.client.widget.table.QueryChangeHandler;
 import org.sagebionetworks.web.shared.WikiPageKey;
 import org.sagebionetworks.web.shared.table.v2.Sort;
 
@@ -27,7 +29,7 @@ import com.google.inject.Inject;
  * @author John
  *
  */
-public class TableEntityWidget implements TableEntityWidgetView.Presenter, WidgetRendererPresenter{
+public class TableEntityWidget implements TableEntityWidgetView.Presenter{
 	
 	private TableEntityWidgetView view;
 	private TableEntity tableEntity;
@@ -132,6 +134,11 @@ public class TableEntityWidget implements TableEntityWidgetView.Presenter, Widge
 			Map<String, String> widgetDescriptor,
 			Callback widgetRefreshRequired, Long wikiVersionInView) {
 		// TODO Auto-generated method stub
+		
+	}
+
+
+	public void configure(EntityBundle bundle, boolean canEdit,	String tableQuery, QueryChangeHandler qch) {
 		
 	}
 

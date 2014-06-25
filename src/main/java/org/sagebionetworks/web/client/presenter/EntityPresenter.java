@@ -8,7 +8,7 @@ import static org.sagebionetworks.web.shared.EntityBundleTransport.ENTITY_REFERE
 import static org.sagebionetworks.web.shared.EntityBundleTransport.FILE_HANDLES;
 import static org.sagebionetworks.web.shared.EntityBundleTransport.HAS_CHILDREN;
 import static org.sagebionetworks.web.shared.EntityBundleTransport.PERMISSIONS;
-import static org.sagebionetworks.web.shared.EntityBundleTransport.UNMET_ACCESS_REQUIREMENTS;
+import static org.sagebionetworks.web.shared.EntityBundleTransport.*;
 
 import org.sagebionetworks.repo.model.EntityHeader;
 import org.sagebionetworks.repo.model.EntityPath;
@@ -113,7 +113,7 @@ public class EntityPresenter extends AbstractActivity implements EntityView.Pres
 		
 		// We want the entity, permissions and path.
 		// TODO : add REFERENCED_BY
-		int mask = ENTITY | ANNOTATIONS | PERMISSIONS | ENTITY_PATH | HAS_CHILDREN | ACCESS_REQUIREMENTS | UNMET_ACCESS_REQUIREMENTS | FILE_HANDLES;
+		int mask = ENTITY | ANNOTATIONS | PERMISSIONS | ENTITY_PATH | HAS_CHILDREN | ACCESS_REQUIREMENTS | UNMET_ACCESS_REQUIREMENTS | FILE_HANDLES | TABLE_DATA;
 		AsyncCallback<EntityBundleTransport> callback = new AsyncCallback<EntityBundleTransport>() {
 			@Override
 			public void onSuccess(EntityBundleTransport transport) {				

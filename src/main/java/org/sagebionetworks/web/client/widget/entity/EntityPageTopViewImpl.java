@@ -46,6 +46,7 @@ import org.sagebionetworks.web.client.widget.table.QueryChangeHandler;
 import org.sagebionetworks.web.client.widget.table.SimpleTableWidget;
 import org.sagebionetworks.web.client.widget.table.TableListWidget;
 import org.sagebionetworks.web.client.widget.table.TableRowHeader;
+import org.sagebionetworks.web.client.widget.table.entity.TableEntityWidget;
 import org.sagebionetworks.web.client.widget.user.UserBadge;
 import org.sagebionetworks.web.shared.WikiPageKey;
 
@@ -255,7 +256,12 @@ public class EntityPageTopViewImpl extends Composite implements EntityPageTopVie
 		    renderSummaryEntity(bundle, entityTypeDisplay, isAdministrator, canEdit, versionNumber);
 		    if (currentArea == null) currentArea = EntityArea.FILES;
 		} else if(bundle.getEntity() instanceof TableEntity) {
-			renderTableEntity(bundle, entityTypeDisplay, isAdministrator, canEdit, projectHeader, areaToken);
+			// Switch to allow testing of the new table.
+			if("john-hill".equals(userProfile.getUserName())){
+				renderTableEntityV2(bundle, entityTypeDisplay, isAdministrator, canEdit, projectHeader, areaToken);
+			}else{
+				renderTableEntity(bundle, entityTypeDisplay, isAdministrator, canEdit, projectHeader, areaToken);
+			}
 		} else {
 			// default entity view
 			renderFileEntity(bundle, entityTypeDisplay, isAdministrator, canEdit, versionNumber, wikiPageId, projectHeader);
@@ -743,6 +749,55 @@ public class EntityPageTopViewImpl extends Composite implements EntityPageTopVie
 		// TODO (maybe):
 //		// Programmatic Clients
 //		tablesTabContainer.add(createProgrammaticClientsWidget(bundle, versionNumber));
+
+		// Created By/Modified By
+		tablesTabContainer.add(createModifiedAndCreatedWidget(bundle.getEntity(), false));
+		// Padding Bottom
+		tablesTabContainer.add(createBottomPadding());		
+	}
+	
+	private void renderTableEntityV2(EntityBundle bundle, String entityTypeDisplay, boolean isAdministrator, boolean canEdit, EntityHeader projectHeader, String areaToken) {
+		// tab container
+		fullWidthContainer.add(currentTabContainer);		
+		setTabSelected(EntityArea.TABLES, false); 
+		
+		// ** LEFT/RIGHT
+		LayoutContainer row;
+		row = DisplayUtils.createRowContainer();
+		LayoutContainer left = new LayoutContainer();
+		left.addStyleName("col-md-8");
+		LayoutContainer right = new LayoutContainer();
+		right.addStyleName("col-md-4");
+		row.add(left);
+		row.add(right);
+		tablesTabContainer.add(row);		
+
+		// add breadcrumbs
+		left.add(breadcrumb.asWidget(bundle.getPath(), EntityArea.TABLES, false));		
+		// TODO: Add table name?
+		// Entity Metadata
+		entityMetadata.setEntityBundle(bundle, versionNumber);
+		left.add(entityMetadata.asWidget());
+		// ActionMenu
+		right.add(actionMenu.asWidget(bundle, isAdministrator, canEdit, null));
+				
+		// Wiki
+		String wikiPageId = null; // TODO : pull from entity
+		addWikiPageWidget(tablesTabContainer, bundle, canEdit, wikiPageId, null);
+
+		// Table
+		TableEntityWidget tableWidget = ginInjector.getTableEntityWidget();
+		QueryChangeHandler qch = new QueryChangeHandler() {			
+			@Override
+			public void onQueryChange(String newQuery) {
+				presenter.setTableQuery(newQuery);				
+			}
+		};		
+		TableRowHeader rowHeader = presenter.getTableRowHeader();
+		tableWidget.configure(bundle, canEdit, presenter.getTableQuery(), qch);
+		Widget tableW = tableWidget.asWidget();
+		tableW.addStyleName("margin-top-15");
+		tablesTabContainer.add(tableW);
 
 		// Created By/Modified By
 		tablesTabContainer.add(createModifiedAndCreatedWidget(bundle.getEntity(), false));

@@ -57,6 +57,7 @@ import org.sagebionetworks.repo.model.Data;
 import org.sagebionetworks.repo.model.EntityBundle;
 import org.sagebionetworks.repo.model.EntityHeader;
 import org.sagebionetworks.repo.model.EntityPath;
+import org.sagebionetworks.repo.model.EntityType;
 import org.sagebionetworks.repo.model.ExampleEntity;
 import org.sagebionetworks.repo.model.FileEntity;
 import org.sagebionetworks.repo.model.LayerTypeNames;
@@ -99,6 +100,10 @@ import org.sagebionetworks.repo.model.message.MessageToUser;
 import org.sagebionetworks.repo.model.quiz.PassingRecord;
 import org.sagebionetworks.repo.model.quiz.Quiz;
 import org.sagebionetworks.repo.model.quiz.QuizResponse;
+import org.sagebionetworks.repo.model.table.ColumnModel;
+import org.sagebionetworks.repo.model.table.ColumnType;
+import org.sagebionetworks.repo.model.table.TableBundle;
+import org.sagebionetworks.repo.model.table.TableEntity;
 import org.sagebionetworks.repo.model.v2.wiki.V2WikiHeader;
 import org.sagebionetworks.repo.model.v2.wiki.V2WikiHistorySnapshot;
 import org.sagebionetworks.repo.model.v2.wiki.V2WikiPage;
@@ -114,6 +119,7 @@ import org.sagebionetworks.web.client.transform.JSONEntityFactory;
 import org.sagebionetworks.web.client.transform.JSONEntityFactoryImpl;
 import org.sagebionetworks.web.client.transform.NodeModelCreator;
 import org.sagebionetworks.web.client.transform.NodeModelCreatorImpl;
+import org.sagebionetworks.web.client.widget.table.entity.TableModelUtils;
 import org.sagebionetworks.web.server.servlet.MarkdownCacheRequest;
 import org.sagebionetworks.web.server.servlet.ServiceUrlProvider;
 import org.sagebionetworks.web.server.servlet.SynapseClientImpl;
@@ -129,6 +135,7 @@ import org.sagebionetworks.web.shared.exceptions.RestServiceException;
 import org.sagebionetworks.web.shared.users.AclUtils;
 import org.sagebionetworks.web.shared.users.PermissionLevel;
 
+import com.atlassian.httpclient.api.EntityBuilder.Entity;
 import com.google.common.cache.Cache;
 
 /**
@@ -167,6 +174,7 @@ public class SynapseClientImplTest {
 	UserProfile mockUserProfile;
 	MembershipInvtnSubmission testInvitation;
 	MessageToUser sentMessage;
+	TableModelUtils tableModelUtils;
 	
 	private static final String EVAL_ID_1 = "eval ID 1";
 	private static final String EVAL_ID_2 = "eval ID 2";
@@ -182,11 +190,12 @@ public class SynapseClientImplTest {
 		mockUrlProvider = Mockito.mock(ServiceUrlProvider.class);
 		when(mockSynapseProvider.createNewClient()).thenReturn(mockSynapse);
 		mockTokenProvider = Mockito.mock(TokenProvider.class);
-		
+		tableModelUtils = new TableModelUtils(adapterFactory);
 		synapseClient = new SynapseClientImpl();
 		synapseClient.setSynapseProvider(mockSynapseProvider);
 		synapseClient.setTokenProvider(mockTokenProvider);
 		synapseClient.setServiceUrlProvider(mockUrlProvider);
+		synapseClient.setTableModelUtils(tableModelUtils);
 		
 		// Setup the the entity
 		entity = new ExampleEntity();
@@ -1415,5 +1424,32 @@ public class SynapseClientImplTest {
 		String actualResult = synapseClient.getVersionOfV2WikiPageAsV1(new WikiPageKey(entity.getId(), ObjectType.ENTITY.toString(), "12"), 5L);
 		assertEquals(pageJson, actualResult);
 		verify(mockCache).get(any(MarkdownCacheRequest.class));
+	}
+	
+	@Test
+	public void testCreateColumnModelAndAddToTable() throws Exception {
+		ColumnModel cm = new ColumnModel();
+		cm.setColumnType(ColumnType.STRING);
+		cm.setName("one");
+		String tableId = "syn123";
+		TableEntity table = new TableEntity();
+		table.setEntityType(TableEntity.class.getName());
+		table.setId(tableId);
+		table.setName("aTable");
+		List<ColumnModel> models = Arrays.asList(cm);
+		TableBundle tableData = new TableBundle();
+		tableData.setColumnModels(models);
+		tableData.setMaxRowsPerPage(new Long(123));
+		EntityBundle bundle = new EntityBundle();
+		bundle.setEntity(table);
+		bundle.setTableBundle(tableData);
+		when(mockSynapse.createColumnModel(cm)).thenReturn(cm);
+		when(mockSynapse.getEntity(tableId, TableEntity.class)).thenReturn(table);
+		when(mockSynapse.putEntity(any(TableEntity.class))).thenReturn(table);
+		when(mockSynapse.getEntityBundle(anyString(), anyInt())).thenReturn(bundle);
+		EntityBundleTransport ebt = synapseClient.createColumnModelAndAddToTable(tableModelUtils.toJSON(table), tableModelUtils.toJSON(cm));
+		org.sagebionetworks.web.client.model.EntityBundle clone = nodeModelCreator.createEntityBundle(ebt);
+		assertEquals(bundle.getEntity(), clone.getEntity());
+		assertEquals(bundle.getTableBundle(), clone.getTableBundle());
 	}
 }

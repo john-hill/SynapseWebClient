@@ -96,6 +96,7 @@ import org.sagebionetworks.repo.model.table.ColumnModel;
 import org.sagebionetworks.repo.model.table.RowReferenceSet;
 import org.sagebionetworks.repo.model.table.RowSelection;
 import org.sagebionetworks.repo.model.table.RowSet;
+import org.sagebionetworks.repo.model.table.TableEntity;
 import org.sagebionetworks.repo.model.table.TableFileHandleResults;
 import org.sagebionetworks.repo.model.v2.wiki.V2WikiHeader;
 import org.sagebionetworks.repo.model.v2.wiki.V2WikiHistorySnapshot;
@@ -116,6 +117,8 @@ import org.sagebionetworks.web.client.DisplayUtils;
 import org.sagebionetworks.web.client.SynapseClient;
 import org.sagebionetworks.web.client.transform.JSONEntityFactory;
 import org.sagebionetworks.web.client.transform.JSONEntityFactoryImpl;
+import org.sagebionetworks.web.client.transform.NodeModelCreator;
+import org.sagebionetworks.web.client.widget.table.entity.TableModelUtils;
 import org.sagebionetworks.web.shared.AccessRequirementsTransport;
 import org.sagebionetworks.web.shared.EntityBundleTransport;
 import org.sagebionetworks.web.shared.EntityConstants;
@@ -177,6 +180,7 @@ public class SynapseClientImpl extends RemoteServiceServlet implements
 	private TokenProvider tokenProvider = this;
 	AdapterFactory adapterFactory = new AdapterFactoryImpl();
 	AutoGenFactory entityFactory = new AutoGenFactory();
+	private TableModelUtils tableModelUtils = new TableModelUtils(adapterFactory);
 	
 	private volatile HashMap<String, org.sagebionetworks.web.shared.WikiPageKey> pageName2WikiKeyMap;
 	private volatile HashSet<String> wikiBasedEntities;
@@ -196,6 +200,9 @@ public class SynapseClientImpl extends RemoteServiceServlet implements
 		this.urlProvider = provider;
 	}
 
+	public void setTableModelUtils(TableModelUtils tableModelUtils) {
+		this.tableModelUtils = tableModelUtils;
+	}
 	/**
 	 * Injected with Gin
 	 */
@@ -423,7 +430,9 @@ public class SynapseClientImpl extends RemoteServiceServlet implements
 			}
 			if ((EntityBundleTransport.FILE_HANDLES & partsMask)!=0 && eb.getFileHandles() != null)
 				ebt.setFileHandlesJson(createJSONStringFromArray(eb.getFileHandles()));
-			
+			if ((EntityBundleTransport.TABLE_DATA & partsMask)!=0 && eb.getTableBundle() != null){
+				ebt.setTableData(EntityFactory.createJSONStringForEntity(eb.getTableBundle()));
+			}	
 			ebt.setIsWikiBasedEntity(getWikiBasedEntities().contains(entityId));
 			
 		} catch (JSONObjectAdapterException e) {
@@ -2807,6 +2816,34 @@ public class SynapseClientImpl extends RemoteServiceServlet implements
 		}
 	}
 
+	@Override
+	public EntityBundleTransport createColumnModelAndAddToTable(String tableEntityJson, String columnModelJson) throws RestServiceException {
+		// First creat the column Model
+		org.sagebionetworks.client.SynapseClient synapseClient = createSynapseClient();
+		try {
+			ColumnModel cm = tableModelUtils.columnModelFromJSON(columnModelJson);
+			// Create the column.
+			cm = synapseClient.createColumnModel(cm);
+			// Read the table entity.
+			TableEntity table = EntityFactory.createEntityFromJSONString(tableEntityJson, TableEntity.class);
+			// Add this to the table
+			if(table.getColumnIds() == null){
+				table.setColumnIds(new ArrayList<String>(1));
+			}
+			// Add this column to the list and update
+			table.getColumnIds().add(cm.getId());
+			// update the entity
+			table = synapseClient.putEntity(table);
+			// Now get the new entity bundle
+			int partsMask = EntityBundle.ENTITY+EntityBundle.TABLE_DATA;
+			EntityBundle bundle = synapseClient.getEntityBundle(table.getId(), partsMask);
+			return convertBundleToTransport(table.getId(), bundle, partsMask);
+		}catch (SynapseException e) {
+			throw ExceptionUtil.convertSynapseException(e);
+		} catch (JSONObjectAdapterException e) {
+			throw new UnknownErrorException(e.getMessage());
+		}
+	}
 
 	
 }
