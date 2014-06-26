@@ -18,16 +18,15 @@ public interface TableColumnWidgetView extends IsWidget, SynapseView{
 	
 	public interface Presenter extends SynapseWidgetPresenter{
 		/**
-		 * Create a new ColumnModel
-		 * @param cm
-		 */
-		public void createNewColumn(ColumnModel cm);
-		
-		/**
-		 * Update the order of the columns of the table.
+		 * Apply the column models to a table.
 		 * @param columnIds
 		 */
-		public void updateColumnOrder(List<String> columnIds);
+		public void applyColumns(List<ColumnModel> columnIds);
+		
+		/**
+		 * If the user clicks cancel, then reload the widget.
+		 */
+		public void cancelEdit();
 	}
 	
 	/**
@@ -38,11 +37,11 @@ public interface TableColumnWidgetView extends IsWidget, SynapseView{
 	public void setColumns(List<ColumnModel> columns);
 	
 	/**
-	 * Enable or disable editing of the widget.
-	 * @param enabled
+	 * This will be called after an apply has failed.
 	 */
-	public void setEditable(boolean enabled);
-
+	public void applyFailed();
+	
+	
 	/**
 	 * Set the presenter.
 	 * @param presenter

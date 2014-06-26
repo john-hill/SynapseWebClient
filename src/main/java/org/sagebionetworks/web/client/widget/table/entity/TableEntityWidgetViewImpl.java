@@ -16,9 +16,11 @@ import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
 
-public class TableEntityWidgetViewImpl extends Composite implements TableEntityWidgetView {
-	
-	public interface Binder extends UiBinder<Widget, TableEntityWidgetViewImpl> {	}
+public class TableEntityWidgetViewImpl extends Composite implements
+		TableEntityWidgetView {
+
+	public interface Binder extends UiBinder<Widget, TableEntityWidgetViewImpl> {
+	}
 
 	@UiField
 	HTMLPanel buttonToolbar;
@@ -30,51 +32,56 @@ public class TableEntityWidgetViewImpl extends Composite implements TableEntityW
 	SimplePanel errorMessage;
 	SageImageBundle sageImageBundle;
 	Presenter presenter;
-	SynapseJSNIUtils jsniUtils;	
-	
+	SynapseJSNIUtils jsniUtils;
+	TableColumnWidget tableColumnWidget;
+
 	@Inject
-	public TableEntityWidgetViewImpl(final Binder uiBinder, SageImageBundle sageImageBundle, SynapseJSNIUtils jsniUtils, PortalGinInjector ginInjector) {
+	public TableEntityWidgetViewImpl(final Binder uiBinder,
+			SageImageBundle sageImageBundle, SynapseJSNIUtils jsniUtils,
+			PortalGinInjector ginInjector,
+			TableColumnWidget tableColumnWidget
+			) {
 		this.sageImageBundle = sageImageBundle;
 		this.jsniUtils = jsniUtils;
 		initWidget(uiBinder.createAndBindUi(this));
 		this.sageImageBundle = sageImageBundle;
+		this.tableColumnWidget = tableColumnWidget;
 	}
-
 
 	@Override
 	public void showLoading() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void showInfo(String title, String message) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void showErrorMessage(String message) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void clear() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setPresenter(Presenter presenter) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void setQuery(String query) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -86,13 +93,13 @@ public class TableEntityWidgetViewImpl extends Composite implements TableEntityW
 	@Override
 	public void showQueryErrorMessage(String message) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void clearQueryErrorMessage() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
@@ -104,13 +111,14 @@ public class TableEntityWidgetViewImpl extends Composite implements TableEntityW
 	@Override
 	public void cancelRowChanges() {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
-	public void setSchema(List<ColumnModel> schema) {
-		// TODO Auto-generated method stub
-		
+	public void setSchema(String tableId, List<ColumnModel> schema) {
+		this.columnEditorPanel.add(this.tableColumnWidget.asWidget());
+		// Pass it along
+		this.tableColumnWidget.configure(tableId, schema);
 	}
 
 }

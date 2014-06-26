@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -2815,35 +2816,74 @@ public class SynapseClientImpl extends RemoteServiceServlet implements
 			throw new UnknownErrorException(e.getMessage());
 		}
 	}
+	
+	/**
+	 * Helper to get the entity bundle of a table entity.
+	 * @param synapseClient
+	 * @param tableId
+	 * @return
+	 * @throws SynapseException
+	 * @throws RestServiceException
+	 */
+	private EntityBundleTransport getTableEntityBundle(org.sagebionetworks.client.SynapseClient synapseClient, String tableId) throws SynapseException, RestServiceException{
+		int partsMask = EntityBundle.ENTITY+EntityBundle.TABLE_DATA;
+		EntityBundle bundle = synapseClient.getEntityBundle(tableId, partsMask);
+		return convertBundleToTransport(tableId, bundle, partsMask);
+	}
 
 	@Override
-	public EntityBundleTransport createColumnModelAndAddToTable(String tableEntityJson, String columnModelJson) throws RestServiceException {
-		// First creat the column Model
+	public List<String> setTableSchema(String tableId, List<String> schemaJSON) throws RestServiceException {
 		org.sagebionetworks.client.SynapseClient synapseClient = createSynapseClient();
 		try {
-			ColumnModel cm = tableModelUtils.columnModelFromJSON(columnModelJson);
-			// Create the column.
-			cm = synapseClient.createColumnModel(cm);
-			// Read the table entity.
-			TableEntity table = EntityFactory.createEntityFromJSONString(tableEntityJson, TableEntity.class);
-			// Add this to the table
-			if(table.getColumnIds() == null){
-				table.setColumnIds(new ArrayList<String>(1));
+			List<ColumnModel> models = tableModelUtils.columnModelFromJSON(schemaJSON);
+			// Create any models that do not have an ID
+			List<String> newSchema = new LinkedList<String>();
+			for(ColumnModel m: models){
+				if(m.getId() == null){
+					ColumnModel clone = synapseClient.createColumnModel(m);
+					m.setId(clone.getId());
+				}
+				newSchema.add(m.getId());
 			}
-			// Add this column to the list and update
-			table.getColumnIds().add(cm.getId());
-			// update the entity
+			// Get the table
+			TableEntity table = synapseClient.getEntity(tableId, TableEntity.class);
+			table.setColumnIds(newSchema);
 			table = synapseClient.putEntity(table);
-			// Now get the new entity bundle
-			int partsMask = EntityBundle.ENTITY+EntityBundle.TABLE_DATA;
-			EntityBundle bundle = synapseClient.getEntityBundle(table.getId(), partsMask);
-			return convertBundleToTransport(table.getId(), bundle, partsMask);
+			// Return the models
+			return tableModelUtils.toJSONList(models);
 		}catch (SynapseException e) {
 			throw ExceptionUtil.convertSynapseException(e);
 		} catch (JSONObjectAdapterException e) {
 			throw new UnknownErrorException(e.getMessage());
 		}
 	}
+
+//	@Override
+//	public EntityBundleTransport createColumnModelAndAddToTable(String tableEntityJson, String columnModelJson) throws RestServiceException {
+//		org.sagebionetworks.client.SynapseClient synapseClient = createSynapseClient();
+//		try {
+//			ColumnModel cm = tableModelUtils.columnModelFromJSON(columnModelJson);
+//			// Create the column.
+//			cm = synapseClient.createColumnModel(cm);
+//			// Read the table entity.
+//			TableEntity table = EntityFactory.createEntityFromJSONString(tableEntityJson, TableEntity.class);
+//			// Add this to the table
+//			if(table.getColumnIds() == null){
+//				table.setColumnIds(new ArrayList<String>(1));
+//			}
+//			// Add this column to the list and update
+//			table.getColumnIds().add(cm.getId());
+//			// update the entity
+//			table = synapseClient.putEntity(table);
+//			// Now get the new entity bundle
+//			return getTableEntityBundle(synapseClient, table.getId());
+//		}catch (SynapseException e) {
+//			throw ExceptionUtil.convertSynapseException(e);
+//		} catch (JSONObjectAdapterException e) {
+//			throw new UnknownErrorException(e.getMessage());
+//		}
+//	}
+
 
 	
 }

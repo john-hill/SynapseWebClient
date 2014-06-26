@@ -57,7 +57,6 @@ import org.sagebionetworks.repo.model.Data;
 import org.sagebionetworks.repo.model.EntityBundle;
 import org.sagebionetworks.repo.model.EntityHeader;
 import org.sagebionetworks.repo.model.EntityPath;
-import org.sagebionetworks.repo.model.EntityType;
 import org.sagebionetworks.repo.model.ExampleEntity;
 import org.sagebionetworks.repo.model.FileEntity;
 import org.sagebionetworks.repo.model.LayerTypeNames;
@@ -100,10 +99,6 @@ import org.sagebionetworks.repo.model.message.MessageToUser;
 import org.sagebionetworks.repo.model.quiz.PassingRecord;
 import org.sagebionetworks.repo.model.quiz.Quiz;
 import org.sagebionetworks.repo.model.quiz.QuizResponse;
-import org.sagebionetworks.repo.model.table.ColumnModel;
-import org.sagebionetworks.repo.model.table.ColumnType;
-import org.sagebionetworks.repo.model.table.TableBundle;
-import org.sagebionetworks.repo.model.table.TableEntity;
 import org.sagebionetworks.repo.model.v2.wiki.V2WikiHeader;
 import org.sagebionetworks.repo.model.v2.wiki.V2WikiHistorySnapshot;
 import org.sagebionetworks.repo.model.v2.wiki.V2WikiPage;
@@ -135,7 +130,6 @@ import org.sagebionetworks.web.shared.exceptions.RestServiceException;
 import org.sagebionetworks.web.shared.users.AclUtils;
 import org.sagebionetworks.web.shared.users.PermissionLevel;
 
-import com.atlassian.httpclient.api.EntityBuilder.Entity;
 import com.google.common.cache.Cache;
 
 /**
@@ -1426,30 +1420,30 @@ public class SynapseClientImplTest {
 		verify(mockCache).get(any(MarkdownCacheRequest.class));
 	}
 	
-	@Test
-	public void testCreateColumnModelAndAddToTable() throws Exception {
-		ColumnModel cm = new ColumnModel();
-		cm.setColumnType(ColumnType.STRING);
-		cm.setName("one");
-		String tableId = "syn123";
-		TableEntity table = new TableEntity();
-		table.setEntityType(TableEntity.class.getName());
-		table.setId(tableId);
-		table.setName("aTable");
-		List<ColumnModel> models = Arrays.asList(cm);
-		TableBundle tableData = new TableBundle();
-		tableData.setColumnModels(models);
-		tableData.setMaxRowsPerPage(new Long(123));
-		EntityBundle bundle = new EntityBundle();
-		bundle.setEntity(table);
-		bundle.setTableBundle(tableData);
-		when(mockSynapse.createColumnModel(cm)).thenReturn(cm);
-		when(mockSynapse.getEntity(tableId, TableEntity.class)).thenReturn(table);
-		when(mockSynapse.putEntity(any(TableEntity.class))).thenReturn(table);
-		when(mockSynapse.getEntityBundle(anyString(), anyInt())).thenReturn(bundle);
-		EntityBundleTransport ebt = synapseClient.createColumnModelAndAddToTable(tableModelUtils.toJSON(table), tableModelUtils.toJSON(cm));
-		org.sagebionetworks.web.client.model.EntityBundle clone = nodeModelCreator.createEntityBundle(ebt);
-		assertEquals(bundle.getEntity(), clone.getEntity());
-		assertEquals(bundle.getTableBundle(), clone.getTableBundle());
-	}
+//	@Test
+//	public void testCreateColumnModelAndAddToTable() throws Exception {
+//		ColumnModel cm = new ColumnModel();
+//		cm.setColumnType(ColumnType.STRING);
+//		cm.setName("one");
+//		String tableId = "syn123";
+//		TableEntity table = new TableEntity();
+//		table.setEntityType(TableEntity.class.getName());
+//		table.setId(tableId);
+//		table.setName("aTable");
+//		List<ColumnModel> models = Arrays.asList(cm);
+//		TableBundle tableData = new TableBundle();
+//		tableData.setColumnModels(models);
+//		tableData.setMaxRowsPerPage(new Long(123));
+//		EntityBundle bundle = new EntityBundle();
+//		bundle.setEntity(table);
+//		bundle.setTableBundle(tableData);
+//		when(mockSynapse.createColumnModel(cm)).thenReturn(cm);
+//		when(mockSynapse.getEntity(tableId, TableEntity.class)).thenReturn(table);
+//		when(mockSynapse.putEntity(any(TableEntity.class))).thenReturn(table);
+//		when(mockSynapse.getEntityBundle(anyString(), anyInt())).thenReturn(bundle);
+//		EntityBundleTransport ebt = synapseClient.createColumnModelAndAddToTable(tableModelUtils.toJSON(table), tableModelUtils.toJSON(cm));
+//		org.sagebionetworks.web.client.model.EntityBundle clone = nodeModelCreator.createEntityBundle(ebt);
+//		assertEquals(bundle.getEntity(), clone.getEntity());
+//		assertEquals(bundle.getTableBundle(), clone.getTableBundle());
+//	}
 }

@@ -4,12 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.sagebionetworks.repo.model.table.ColumnModel;
-import org.sagebionetworks.repo.model.table.TableEntity;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
-import org.sagebionetworks.web.client.DisplayConstants;
+import org.sagebionetworks.web.client.DispalyUtilsContext;
 import org.sagebionetworks.web.client.SynapseClientAsync;
-import org.sagebionetworks.web.client.model.EntityBundle;
-import org.sagebionetworks.web.shared.EntityBundleTransport;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
@@ -24,59 +21,23 @@ import com.google.inject.Inject;
  */
 public class TableColumnWidget implements TableColumnWidgetView.Presenter {
 	
+	private static final String FAILED_TO_APPLY_COLUMN_CHANGES_TO_TABLE = "Failed to apply column changes to table: ";
+	private static final String FAILED_TO_RELOAD_COLUMNS = "Failed to reload columns: ";
+	private DispalyUtilsContext displayUtilsContext;
 	private TableColumnWidgetView view;
 	private SynapseClientAsync synapseClient;
-	private TableModelUtils tableJSONUtils;
+	private TableModelUtils tableUtils;
 	private List<ColumnModel> columnModels;
-	private TableEntity tableEntity;
+	private String tableId;
 	
 	@Inject
 	public TableColumnWidget(TableColumnWidgetView view,
-			SynapseClientAsync synapseClient, TableModelUtils tableJSONUtils) {
+			SynapseClientAsync synapseClient, TableModelUtils tableUtils, DispalyUtilsContext displayUtilsContex) {
 		super();
 		this.view = view;
 		this.synapseClient = synapseClient;
-		this.tableJSONUtils = tableJSONUtils;
-	}
-
-	@Override
-	public void createNewColumn(ColumnModel cm) {
-		// First disable the view
-		view.setEditable(false);
-		try {
-			String columnJson = tableJSONUtils.toJSON(cm);
-			String tableJson = tableJSONUtils.toJSON(tableEntity);
-			synapseClient.createColumnModelAndAddToTable(tableJson, columnJson, new AsyncCallback<EntityBundleTransport>(){
-
-				@Override
-				public void onFailure(Throwable caught) {
-					view.showErrorMessage("Failed to create a column: "+caught.getMessage());
-					reload();
-				}
-
-				@Override
-				public void onSuccess(EntityBundleTransport transport) {
-					try {
-						// configure again
-						configure(transport);
-					} catch (JSONObjectAdapterException e) {
-						view.showErrorMessage(DisplayConstants.ERROR_INCOMPATIBLE_CLIENT_VERSION);
-					}
-
-					
-				}});
-		} catch (JSONObjectAdapterException e) {
-			view.showErrorMessage(DisplayConstants.ERROR_INCOMPATIBLE_CLIENT_VERSION);
-			reload();
-		}
-
-	}
-
-	@Override
-	public void updateColumnOrder(List<String> columnIds) {
-		// First disable the view
-		view.setEditable(false);
-		
+		this.tableUtils = tableUtils;
+		this.displayUtilsContext = displayUtilsContex;
 	}
 
 	@Override
@@ -85,29 +46,21 @@ public class TableColumnWidget implements TableColumnWidgetView.Presenter {
 		return view.asWidget();	
 	}
 	
-	public void configure(EntityBundleTransport transport) throws JSONObjectAdapterException{
-		EntityBundle bundle = tableJSONUtils.bundleFromTransport(transport);
-		configure((TableEntity) bundle.getEntity(), bundle.getTableBundle().getColumnModels());
-	}
-	
-	
 	/**
 	 * Configure this widget with the column models of a table entity.
 	 * @param models
 	 */
-	public void configure(TableEntity tableEntity, List<ColumnModel> models){
+	public void configure(String tableId, List<ColumnModel> models){
 		if(models == null){
 			models = new ArrayList<ColumnModel>();
 		}
 		this.columnModels = models;
-		this.tableEntity = tableEntity;
+		this.tableId = tableId;
 		// Start with the view non-editable
-		view.setEditable(false);
+		view.showLoading();
 
 		// pass this along to the view
 		view.setColumns(this.columnModels);
-		// Make the view editable
-		view.setEditable(true);
 	}
 	
 	/**
@@ -115,25 +68,59 @@ public class TableColumnWidget implements TableColumnWidgetView.Presenter {
 	 */
 	private void reload(){
 		// disable the view.
-		view.setEditable(false);
-		// Load the columns from the table
-		int partsMask = EntityBundleTransport.ENTITY + EntityBundleTransport.TABLE_DATA;
-		synapseClient.getEntityBundle(tableEntity.getId(), partsMask, new AsyncCallback<EntityBundleTransport>(){
-
+		view.showLoading();
+		synapseClient.getColumnModelsForTableEntity(this.tableId, new AsyncCallback<List<String>>() {
+			
+			@Override
+			public void onSuccess(List<String> result) {
+				try {
+					// The new column models.
+					columnModels = tableUtils.columnModelFromJSON(result);
+					// Pass to the view
+					view.setColumns(columnModels);
+				} catch (JSONObjectAdapterException e) {
+					displayUtilsContext.handleServiceException(e, view, FAILED_TO_RELOAD_COLUMNS+e.getMessage());
+				}
+			}
 			@Override
 			public void onFailure(Throwable caught) {
-				view.showErrorMessage("Failed to reload: "+caught.getMessage());
+				displayUtilsContext.handleServiceException(caught, view, FAILED_TO_RELOAD_COLUMNS+caught.getMessage());
 			}
+		});
+	}
 
-			@Override
-			public void onSuccess(EntityBundleTransport transport) {
-				try {
-					configure(transport);
-				} catch (JSONObjectAdapterException e) {
-					view.showErrorMessage(DisplayConstants.ERROR_INCOMPATIBLE_CLIENT_VERSION);
+	@Override
+	public void applyColumns(List<ColumnModel> columns) {
+		// Set the view to loading
+		view.showLoading();
+		try {
+			
+			List<String> jsons = tableUtils.toJSONList(columns);
+			synapseClient.setTableSchema(this.tableId, jsons, new AsyncCallback<List<String>>() {
+				
+				@Override
+				public void onSuccess(List<String> results) {
+					try {
+						columnModels = tableUtils.columnModelFromJSON(results);
+					} catch (JSONObjectAdapterException e) {
+						displayUtilsContext.handleServiceException(e, view, FAILED_TO_APPLY_COLUMN_CHANGES_TO_TABLE+e.getMessage());
+					}
 				}
 				
-			}});
+				@Override
+				public void onFailure(Throwable caught) {
+					displayUtilsContext.handleServiceException(caught, view, FAILED_TO_APPLY_COLUMN_CHANGES_TO_TABLE+caught.getMessage());
+				}
+			});
+		} catch (JSONObjectAdapterException e) {
+			displayUtilsContext.handleServiceException(e, view, FAILED_TO_APPLY_COLUMN_CHANGES_TO_TABLE+e.getMessage());
+		}
+	}
+
+	@Override
+	public void cancelEdit() {
+		// Reload on cancel
+		reload();
 	}
 
 }

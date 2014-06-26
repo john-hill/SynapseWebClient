@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.sagebionetworks.repo.model.table.ColumnModel;
+import org.sagebionetworks.repo.model.table.TableBundle;
 import org.sagebionetworks.repo.model.table.TableEntity;
 import org.sagebionetworks.schema.adapter.AdapterFactory;
 import org.sagebionetworks.schema.adapter.JSONObjectAdapterException;
@@ -49,12 +50,6 @@ public class TableEntityWidget implements TableEntityWidgetView.Presenter{
 		this.adapterFactory = adapterFactory;
 		this.displayUtilsContext = displayUtilsContext;
 	}
-
-
-	public void configure(TableEntity entity, boolean canEdit){
-		this.tableEntity = entity;
-	}
-
 
 	
 	@Override
@@ -139,7 +134,10 @@ public class TableEntityWidget implements TableEntityWidgetView.Presenter{
 
 
 	public void configure(EntityBundle bundle, boolean canEdit,	String tableQuery, QueryChangeHandler qch) {
-		
+		// Set the schema
+		TableEntity table = (TableEntity) bundle.getEntity();
+		TableBundle tableBundle = bundle.getTableBundle();
+		this.view.setSchema(table.getId(), tableBundle.getColumnModels());
 	}
 
 }

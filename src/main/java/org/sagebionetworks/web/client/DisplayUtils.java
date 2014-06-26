@@ -378,6 +378,8 @@ public class DisplayUtils {
 			view.showErrorMessage(DisplayConstants.ERROR_NOT_FOUND);
 			globalApplicationState.getPlaceChanger().goTo(new Home(DEFAULT_PLACE_TOKEN));
 			return true;
+		} else if(ex instanceof JSONObjectAdapterException){
+			view.showErrorMessage(DisplayConstants.ERROR_INCOMPATIBLE_CLIENT_VERSION);
 		}
 		
 		// For other exceptions, allow the consumer to send a good message to the user

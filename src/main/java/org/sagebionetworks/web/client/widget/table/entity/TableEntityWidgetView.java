@@ -120,7 +120,7 @@ public interface TableEntityWidgetView extends IsWidget, SynapseView {
 	 * Notify the view of the table schema.
 	 * @param schema
 	 */
-	public void setSchema(List<ColumnModel> schema);
+	public void setSchema(String tableId, List<ColumnModel> schema);
 	
 	/**
 	 * Set the presenter.

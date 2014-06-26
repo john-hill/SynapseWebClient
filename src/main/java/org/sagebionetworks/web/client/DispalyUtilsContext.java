@@ -31,13 +31,16 @@ public class DispalyUtilsContext {
 	}
 	
 	/**
-	 * Handles the exception. Returns true if the user has been alerted to the exception already
+	 * Handles services exception. If DisplayUtils does not handle the message
+	 * the passed fallbackMessage will be shown.
 	 * @param caught
 	 * @param view
 	 * @return
 	 */
-	public boolean handleServiceException(Throwable caught, SynapseView view){
-		return DisplayUtils.handleServiceException(caught, globalApplicationState, authenticationController.isLoggedIn(), view);
+	public void handleServiceException(Throwable caught, SynapseView view, String fallbackMessage){
+		if(! DisplayUtils.handleServiceException(caught, globalApplicationState, authenticationController.isLoggedIn(), view)){
+			view.showErrorMessage(fallbackMessage);
+		}
 	}
 	
 }
