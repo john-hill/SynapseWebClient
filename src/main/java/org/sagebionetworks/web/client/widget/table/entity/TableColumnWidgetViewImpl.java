@@ -20,6 +20,7 @@ import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.HTML;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -70,8 +71,12 @@ public class TableColumnWidgetViewImpl extends Composite implements TableColumnW
 
 	@Override
 	public void setColumns(List<ColumnModel> columns) {
-		Widget editor = buildColumnsEditor(columns);
-		mainPanel.add(editor);
+//		Widget editor = buildColumnsEditor(columns);
+//		mainPanel.add(editor);
+	
+		mainPanel.add(new Label("Testing..."));
+		
+		mainPanel.setVisible(true);
 	}
 
 	@Override

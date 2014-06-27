@@ -1,5 +1,6 @@
 package org.sagebionetworks.web.client.widget.table.entity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.sagebionetworks.repo.model.table.ColumnModel;
@@ -12,6 +13,7 @@ import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.user.client.ui.Composite;
 import com.google.gwt.user.client.ui.HTMLPanel;
+import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.SimplePanel;
 import com.google.gwt.user.client.ui.Widget;
 import com.google.inject.Inject;
@@ -116,7 +118,17 @@ public class TableEntityWidgetViewImpl extends Composite implements
 
 	@Override
 	public void setSchema(String tableId, List<ColumnModel> schema) {
-		this.columnEditorPanel.add(this.tableColumnWidget.asWidget());
+//		this.columnEditorPanel.add(this.tableColumnWidget.asWidget());
+
+		List<SaveCancelWidget> children = new ArrayList<SaveCancelWidget>(3);
+		children.add(new SampleSaveCanceWidget("one", "Start text one"));
+		children.add(new SampleSaveCanceWidget("two", "Start text two"));
+		children.add(new SampleSaveCanceWidget("three", "Start text three"));
+		
+		MultipleSaveCancelPanel mscp = new MultipleSaveCancelPanel("exampleId", children);
+		this.columnEditorPanel.add(mscp);
+//		this.columnEditorPanel.add(new Label("Testing...."));
+		this.columnEditorPanel.setVisible(true);
 		// Pass it along
 		this.tableColumnWidget.configure(tableId, schema);
 	}
