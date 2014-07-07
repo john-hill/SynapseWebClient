@@ -1,5 +1,7 @@
 package org.sagebionetworks.web.client.widget.entity.browse;
 
+import java.util.Date;
+
 import org.sagebionetworks.repo.model.AutoGenFactory;
 import org.sagebionetworks.repo.model.Entity;
 import org.sagebionetworks.repo.model.Folder;
@@ -9,6 +11,8 @@ import org.sagebionetworks.web.client.DisplayConstants;
 import org.sagebionetworks.web.client.DisplayUtils;
 import org.sagebionetworks.web.client.GlobalApplicationState;
 import org.sagebionetworks.web.client.SynapseClientAsync;
+import org.sagebionetworks.web.client.UploadView;
+import org.sagebionetworks.web.client.cookie.CookieKeys;
 import org.sagebionetworks.web.client.cookie.CookieProvider;
 import org.sagebionetworks.web.client.events.EntityUpdatedEvent;
 import org.sagebionetworks.web.client.events.EntityUpdatedHandler;
@@ -16,11 +20,13 @@ import org.sagebionetworks.web.client.security.AuthenticationController;
 import org.sagebionetworks.web.client.transform.NodeModelCreator;
 import org.sagebionetworks.web.client.utils.CallbackP;
 import org.sagebionetworks.web.client.widget.SynapseWidgetPresenter;
+import org.sagebionetworks.web.client.widget.entity.EntityAccessRequirementsWidget;
 import org.sagebionetworks.web.shared.EntityWrapper;
 import org.sagebionetworks.web.shared.exceptions.NotFoundException;
 
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Widget;
+import com.google.gwt.user.datepicker.client.CalendarUtil;
 import com.google.inject.Inject;
 
 public class FilesBrowser implements FilesBrowserView.Presenter, SynapseWidgetPresenter {
@@ -35,6 +41,7 @@ public class FilesBrowser implements FilesBrowserView.Presenter, SynapseWidgetPr
 	GlobalApplicationState globalApplicationState;
 	AuthenticationController authenticationController;
 	CookieProvider cookies;
+	EntityAccessRequirementsWidget accessRequirementsWidget;
 	boolean canEdit = false;
 	
 	@Inject
@@ -44,7 +51,8 @@ public class FilesBrowser implements FilesBrowserView.Presenter, SynapseWidgetPr
 			AutoGenFactory autogenFactory,
 			GlobalApplicationState globalApplicationState,
 			AuthenticationController authenticationController,
-			CookieProvider cookies) {
+			CookieProvider cookies,
+			EntityAccessRequirementsWidget accessRequirementsWidget) {
 		this.view = view;		
 		this.synapseClient = synapseClient;
 		this.nodeModelCreator = nodeModelCreator;
@@ -53,6 +61,7 @@ public class FilesBrowser implements FilesBrowserView.Presenter, SynapseWidgetPr
 		this.globalApplicationState = globalApplicationState;
 		this.authenticationController = authenticationController;
 		this.cookies = cookies;
+		this.accessRequirementsWidget = accessRequirementsWidget;
 		view.setPresenter(this);
 	}	
 	
@@ -99,11 +108,38 @@ public class FilesBrowser implements FilesBrowserView.Presenter, SynapseWidgetPr
 
 	@Override
 	public void uploadButtonClicked() {
+		uploadButtonClickedStep1(accessRequirementsWidget, configuredEntityId, view, synapseClient, cookies, authenticationController);
+	}
+	
+	//any access requirements to accept?
+	public static void uploadButtonClickedStep1(
+			EntityAccessRequirementsWidget accessRequirementsWidget, 
+			final String entityId, 
+			final UploadView view,
+			final SynapseClientAsync synapseClient,
+			final CookieProvider cookies,
+			final AuthenticationController authenticationController) {
+		CallbackP<Boolean> callback = new CallbackP<Boolean>() {
+			@Override
+			public void invoke(Boolean accepted) {
+				if (accepted)
+					uploadButtonClickedStep2(entityId, view, synapseClient, cookies, authenticationController);
+			}
+		};
+		accessRequirementsWidget.showUploadAccessRequirements(entityId, callback);
+	}
+
 		//is this a certified user?
+	public static void uploadButtonClickedStep2(
+			final String entityId, 
+			final UploadView view,
+			SynapseClientAsync synapseClient,
+			final CookieProvider cookies,
+			AuthenticationController authenticationController) {
 		AsyncCallback<String> userCertifiedCallback = new AsyncCallback<String>() {
 			@Override
 			public void onSuccess(String passingRecord) {
-				view.showUploadDialog(configuredEntityId);
+				view.showUploadDialog(entityId);
 			}
 			@Override
 			public void onFailure(Throwable t) {
@@ -111,16 +147,22 @@ public class FilesBrowser implements FilesBrowserView.Presenter, SynapseWidgetPr
 					view.showQuizInfoDialog(new CallbackP<Boolean>() {
 						@Override
 						public void invoke(Boolean tutorialClicked) {
-							if (!tutorialClicked)
-								view.showUploadDialog(configuredEntityId);
+							if (!tutorialClicked) {
+								//remind me later clicked
+								//do not pop this up for a day
+								Date date = new Date();
+								CalendarUtil.addDaysToDate(date, 1);
+								cookies.setCookie(CookieKeys.IGNORE_CERTIFICATION_REMINDER, Boolean.TRUE.toString(), date);
+								view.showUploadDialog(entityId);
+						}
 						}
 					});					
 				} else
 					view.showErrorMessage(t.getMessage());
 			}
 		};
-		//TODO:  only in test website until tutorial content is ready
-		if (DisplayUtils.isInTestWebsite(cookies)) {
+		//only if cookie is not set
+		if (cookies.getCookie(CookieKeys.IGNORE_CERTIFICATION_REMINDER) == null) {
 			synapseClient.getCertifiedUserPassingRecord(authenticationController.getCurrentUserPrincipalId(), userCertifiedCallback);
 		} else {
 			userCertifiedCallback.onSuccess("");

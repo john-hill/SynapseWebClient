@@ -190,6 +190,8 @@ public interface SynapseClient extends RemoteService {
 			throws RestServiceException;
 
 	String getUnmetTeamAccessRequirements(String teamId) throws RestServiceException;
+	String getTeamAccessRequirements(String teamId) throws RestServiceException;
+	String getAllEntityUploadAccessRequirements(String entityId) throws RestServiceException;
 	
 	EntityWrapper createAccessApproval(EntityWrapper aaEW)
 			throws RestServiceException;

@@ -716,11 +716,8 @@ public class SynapseClientImpl extends RemoteServiceServlet implements
 	public String getUserProfile() throws RestServiceException {
 		try	{
 			//cached, in a cookie?
-			UserProfile profile = UserDataProvider.getThreadLocalUserProfile(this.getThreadLocalRequest());
-			if (profile == null){
-				org.sagebionetworks.client.SynapseClient synapseClient = createSynapseClient();
-				profile = synapseClient.getMyProfile();
-			}
+			org.sagebionetworks.client.SynapseClient synapseClient = createSynapseClient();
+			UserProfile profile = synapseClient.getMyProfile();
 			return EntityFactory.createJSONStringForEntity(profile);
 		} catch (JSONObjectAdapterException e) {
 			throw new UnknownErrorException(e.getMessage());
@@ -1038,14 +1035,26 @@ public class SynapseClientImpl extends RemoteServiceServlet implements
 	
 	@Override
 	public String getUnmetTeamAccessRequirements(String teamId) throws RestServiceException {
+		return getTeamAccessRequirements(teamId, true);
+	}
+
+	@Override
+	public String getTeamAccessRequirements(String teamId) throws RestServiceException {
+		return getTeamAccessRequirements(teamId, false);
+	}
+
+	
+	private String getTeamAccessRequirements(String teamId, boolean unmetOnly) throws RestServiceException {
 		org.sagebionetworks.client.SynapseClient synapseClient = createSynapseClient();
 		try {
 			RestrictableObjectDescriptor subjectId = new RestrictableObjectDescriptor();
 			subjectId.setId(teamId);
 			subjectId.setType(RestrictableObjectType.TEAM);
-			
-			VariableContentPaginatedResults<AccessRequirement> accessRequirements = 
-				synapseClient.getUnmetAccessRequirements(subjectId);
+			VariableContentPaginatedResults<AccessRequirement> accessRequirements;
+			if (unmetOnly)
+				accessRequirements = synapseClient.getUnmetAccessRequirements(subjectId);
+			else
+				accessRequirements = synapseClient.getAccessRequirements(subjectId);
 			JSONObjectAdapter arJson = accessRequirements.writeToJSONObject(adapterFactory.createNew());
 			return arJson.toJSONString();
 		} catch (SynapseException e) {
@@ -1054,7 +1063,51 @@ public class SynapseClientImpl extends RemoteServiceServlet implements
 			throw new UnknownErrorException(e.getMessage());
 		} 
 	}
+	
+	@Override
+	public String getAllEntityUploadAccessRequirements(String entityId) throws RestServiceException {
+		return getEntityAccessRequirements(entityId, false, ACCESS_TYPE.UPLOAD);
+	}
 
+	public String getEntityAccessRequirements(String entityId, boolean unmetOnly, ACCESS_TYPE targetAccessType) throws RestServiceException {
+		org.sagebionetworks.client.SynapseClient synapseClient = createSynapseClient();
+		try {
+			RestrictableObjectDescriptor subjectId = new RestrictableObjectDescriptor();
+			subjectId.setId(entityId);
+			subjectId.setType(RestrictableObjectType.ENTITY);
+			VariableContentPaginatedResults<AccessRequirement> accessRequirements;
+			if (unmetOnly)
+				accessRequirements = synapseClient.getUnmetAccessRequirements(subjectId);
+			else
+				accessRequirements = synapseClient.getAccessRequirements(subjectId);
+			//filter to the targetAccessType
+			if (targetAccessType != null) {
+				List<AccessRequirement> filteredResults = filterAccessRequirements(accessRequirements.getResults(), targetAccessType);
+				accessRequirements.setResults(filteredResults);
+				accessRequirements.setTotalNumberOfResults(filteredResults.size());
+			}
+			
+			JSONObjectAdapter arJson = accessRequirements.writeToJSONObject(adapterFactory.createNew());
+			return arJson.toJSONString();
+		} catch (SynapseException e) {
+			throw ExceptionUtil.convertSynapseException(e);
+		} catch (JSONObjectAdapterException e) {
+			throw new UnknownErrorException(e.getMessage());
+		} 
+	}
+	
+	public List<AccessRequirement> filterAccessRequirements(List<AccessRequirement> unfilteredList, ACCESS_TYPE filter) {
+		List<AccessRequirement> filteredAccessRequirements = new ArrayList<AccessRequirement>();
+		if (unfilteredList != null) {
+			for (AccessRequirement accessRequirement : unfilteredList) {
+				if (filter.equals(accessRequirement.getAccessType())) {
+					filteredAccessRequirements.add(accessRequirement);
+				}
+			}
+		}
+		return filteredAccessRequirements;
+	}
+	
 	
 	@Override
 	public EntityWrapper createAccessApproval(EntityWrapper aaEW) throws RestServiceException {
@@ -2739,14 +2792,15 @@ public class SynapseClientImpl extends RemoteServiceServlet implements
 	private void initHelpPagesMap() {
 		if (pageName2WikiKeyMap == null) {
 			HashMap<String, org.sagebionetworks.web.shared.WikiPageKey> tempMap = new HashMap<String, org.sagebionetworks.web.shared.WikiPageKey>();
-			tempMap.put(WebConstants.USER_GUIDE, new org.sagebionetworks.web.shared.WikiPageKey(getSynapseProperty(WebConstants.USER_GUIDE_ENTITY_ID_PROPERTY), ObjectType.ENTITY.toString(), getSynapseProperty(WebConstants.USER_GUIDE_WIKI_ID_PROPERTY)));
 			tempMap.put(WebConstants.GETTING_STARTED, new org.sagebionetworks.web.shared.WikiPageKey(getSynapseProperty(WebConstants.GETTING_STARTED_GUIDE_ENTITY_ID_PROPERTY), ObjectType.ENTITY.toString(), getSynapseProperty(WebConstants.GETTING_STARTED_GUIDE_WIKI_ID_PROPERTY)));
 			tempMap.put(WebConstants.CREATE_PROJECT, new org.sagebionetworks.web.shared.WikiPageKey(getSynapseProperty(WebConstants.CREATE_PROJECT_ENTITY_ID_PROPERTY), ObjectType.ENTITY.toString(), getSynapseProperty(WebConstants.CREATE_PROJECT_WIKI_ID_PROPERTY)));
 			tempMap.put(WebConstants.R_CLIENT, new org.sagebionetworks.web.shared.WikiPageKey(getSynapseProperty(WebConstants.R_CLIENT_ENTITY_ID_PROPERTY), ObjectType.ENTITY.toString(), getSynapseProperty(WebConstants.R_CLIENT_WIKI_ID_PROPERTY)));
 			tempMap.put(WebConstants.PYTHON_CLIENT, new org.sagebionetworks.web.shared.WikiPageKey(getSynapseProperty(WebConstants.PYTHON_CLIENT_ENTITY_ID_PROPERTY), ObjectType.ENTITY.toString(), getSynapseProperty(WebConstants.PYTHON_CLIENT_WIKI_ID_PROPERTY)));
 			tempMap.put(WebConstants.COMMAND_LINE_CLIENT, new org.sagebionetworks.web.shared.WikiPageKey(getSynapseProperty(WebConstants.PYTHON_CLIENT_ENTITY_ID_PROPERTY), ObjectType.ENTITY.toString(), getSynapseProperty(WebConstants.PYTHON_CLIENT_WIKI_ID_PROPERTY)));
-			tempMap.put(WebConstants.USER_CERTIFICATION_TUTORIAL, new org.sagebionetworks.web.shared.WikiPageKey(getSynapseProperty(WebConstants.TRUSTED_USER_ENTITY_ID_PROPERTY), ObjectType.ENTITY.toString(), getSynapseProperty(WebConstants.TRUSTED_USER_WIKI_ID_PROPERTY)));
 			tempMap.put(WebConstants.FORMATTING_GUIDE, new org.sagebionetworks.web.shared.WikiPageKey(getSynapseProperty(WebConstants.FORMATTING_GUIDE_ENTITY_ID_PROPERTY), ObjectType.ENTITY.toString(), getSynapseProperty(WebConstants.FORMATTING_GUIDE_WIKI_ID_PROPERTY)));
+			tempMap.put(WebConstants.CHALLENGE_PARTICIPATION_INFO, new org.sagebionetworks.web.shared.WikiPageKey(getSynapseProperty(WebConstants.CHALLENGE_PARTICIPATION_INFO_ENTITY_ID_PROPERTY), ObjectType.ENTITY.toString(), getSynapseProperty(WebConstants.CHALLENGE_PARTICIPATION_INFO_WIKI_ID_PROPERTY)));
+			tempMap.put(WebConstants.GOVERNANCE, new org.sagebionetworks.web.shared.WikiPageKey(getSynapseProperty(WebConstants.GOVERNANCE_ENTITY_ID_PROPERTY), ObjectType.ENTITY.toString(), getSynapseProperty(WebConstants.GOVERNANCE_WIKI_ID_PROPERTY)));
+			
 			pageName2WikiKeyMap = tempMap;
 		}
 	}
@@ -2760,12 +2814,10 @@ public class SynapseClientImpl extends RemoteServiceServlet implements
 	private void initWikiEntities() {
 		if (wikiBasedEntities == null) {
 			HashSet<String> tempSet = new HashSet<String>();
-			tempSet.add(getSynapseProperty(WebConstants.USER_GUIDE_ENTITY_ID_PROPERTY));
 			tempSet.add(getSynapseProperty(WebConstants.GETTING_STARTED_GUIDE_ENTITY_ID_PROPERTY));
 			tempSet.add(getSynapseProperty(WebConstants.CREATE_PROJECT_ENTITY_ID_PROPERTY));
 			tempSet.add(getSynapseProperty(WebConstants.R_CLIENT_ENTITY_ID_PROPERTY));
 			tempSet.add(getSynapseProperty(WebConstants.PYTHON_CLIENT_ENTITY_ID_PROPERTY));
-			tempSet.add(getSynapseProperty(WebConstants.TRUSTED_USER_ENTITY_ID_PROPERTY));
 			tempSet.add(getSynapseProperty(WebConstants.FORMATTING_GUIDE_ENTITY_ID_PROPERTY));
 			//because wikiBasedEntities is volatile, current state will be reflected in all threads
 			wikiBasedEntities = tempSet;

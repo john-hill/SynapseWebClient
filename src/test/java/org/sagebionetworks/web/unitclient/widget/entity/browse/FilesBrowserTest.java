@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Mockito;
 import org.sagebionetworks.repo.model.AutoGenFactory;
 import org.sagebionetworks.repo.model.Folder;
 import org.sagebionetworks.schema.adapter.AdapterFactory;
@@ -17,10 +18,12 @@ import org.sagebionetworks.web.client.DisplayConstants;
 import org.sagebionetworks.web.client.DisplayUtils;
 import org.sagebionetworks.web.client.GlobalApplicationState;
 import org.sagebionetworks.web.client.SynapseClientAsync;
+import org.sagebionetworks.web.client.cookie.CookieKeys;
 import org.sagebionetworks.web.client.cookie.CookieProvider;
 import org.sagebionetworks.web.client.security.AuthenticationController;
 import org.sagebionetworks.web.client.transform.NodeModelCreator;
 import org.sagebionetworks.web.client.utils.CallbackP;
+import org.sagebionetworks.web.client.widget.entity.EntityAccessRequirementsWidget;
 import org.sagebionetworks.web.client.widget.entity.browse.FilesBrowser;
 import org.sagebionetworks.web.client.widget.entity.browse.FilesBrowserView;
 import org.sagebionetworks.web.shared.exceptions.NotFoundException;
@@ -40,6 +43,7 @@ public class FilesBrowserTest {
 	FilesBrowser filesBrowser;
 	CookieProvider mockCookies;
 	String configuredEntityId = "syn123";
+	EntityAccessRequirementsWidget mockAccessRequirementsWidget;
 	
 	@Before
 	public void before() throws JSONObjectAdapterException {
@@ -48,12 +52,13 @@ public class FilesBrowserTest {
 		mockNodeModelCreator = mock(NodeModelCreator.class);
 		mockGlobalApplicationState = mock(GlobalApplicationState.class);
 		mockAuthenticationController = mock(AuthenticationController.class);
+		mockAccessRequirementsWidget = mock(EntityAccessRequirementsWidget.class);
 		adapterFactory = new AdapterFactoryImpl();
 		autoGenFactory = new AutoGenFactory();
 		mockCookies = mock(CookieProvider.class);
 		filesBrowser = new FilesBrowser(mockView, mockSynapseClient,
 				mockNodeModelCreator, adapterFactory, autoGenFactory,
-				mockGlobalApplicationState, mockAuthenticationController, mockCookies);
+				mockGlobalApplicationState, mockAuthenticationController, mockCookies, mockAccessRequirementsWidget);
 		verify(mockView).setPresenter(filesBrowser);
 		filesBrowser.configure(configuredEntityId);
 		String newId = "syn456";
@@ -145,16 +150,39 @@ public class FilesBrowserTest {
 		verify(mockView).showErrorMessage(DisplayConstants.ERROR_FOLDER_RENAME_FAILED);
 	}
 	
+
 	@Test
-	public void testUploadButtonClickedCertified(){
-		filesBrowser.uploadButtonClicked();
+	public void testUploadStep1ARsAccepted(){
+		FilesBrowser.uploadButtonClickedStep1(mockAccessRequirementsWidget, configuredEntityId, mockView, mockSynapseClient, mockCookies, mockAuthenticationController);
+		ArgumentCaptor<CallbackP> arg = ArgumentCaptor.forClass(CallbackP.class);
+		verify(mockAccessRequirementsWidget).showUploadAccessRequirements(eq(configuredEntityId), arg.capture());
+		CallbackP callback = arg.getValue();
+		callback.invoke(true);
+		//verify if accepted then it should continue (eventually showing the upload dialog)
 		verify(mockView).showUploadDialog(anyString());
 	}
 	
 	@Test
-	public void testUploadButtonClickedNotCertified(){
+	public void testUploadStep1ARsNotAccepted(){
+		FilesBrowser.uploadButtonClickedStep1(mockAccessRequirementsWidget, configuredEntityId, mockView, mockSynapseClient, mockCookies, mockAuthenticationController);
+		ArgumentCaptor<CallbackP> arg = ArgumentCaptor.forClass(CallbackP.class);
+		verify(mockAccessRequirementsWidget).showUploadAccessRequirements(eq(configuredEntityId), arg.capture());
+		CallbackP callback = arg.getValue();
+		callback.invoke(false);
+		//verify if not accepted then the upload dialog is not shown
+		verify(mockView, never()).showUploadDialog(anyString());
+	}
+	
+	@Test
+	public void testUploadStep2Certified(){
+		FilesBrowser.uploadButtonClickedStep2(configuredEntityId, mockView, mockSynapseClient, mockCookies, mockAuthenticationController);
+		verify(mockView).showUploadDialog(anyString());
+	}
+	
+	@Test
+	public void testUploadStep2NotCertified(){
 		AsyncMockStubber.callFailureWith(new NotFoundException()).when(mockSynapseClient).getCertifiedUserPassingRecord(anyString(), any(AsyncCallback.class));
-		filesBrowser.uploadButtonClicked();
+		FilesBrowser.uploadButtonClickedStep2(configuredEntityId, mockView, mockSynapseClient, mockCookies, mockAuthenticationController);
 		
 		ArgumentCaptor<CallbackP> arg = ArgumentCaptor.forClass(CallbackP.class);
 		verify(mockView).showQuizInfoDialog(arg.capture());
@@ -168,9 +196,21 @@ public class FilesBrowserTest {
 	}
 	
 	@Test
-	public void testUploadButtonClickedFailure(){
+	public void testUploadStep2NotCertifiedIgnore(){
+		//simulate that the dialog was previously ignored
+		AsyncMockStubber.callFailureWith(new NotFoundException()).when(mockSynapseClient).getCertifiedUserPassingRecord(anyString(), any(AsyncCallback.class));
+		when(mockCookies.getCookie(eq(CookieKeys.IGNORE_CERTIFICATION_REMINDER))).thenReturn("yes");
+		FilesBrowser.uploadButtonClickedStep2(configuredEntityId, mockView, mockSynapseClient, mockCookies, mockAuthenticationController);
+		
+		//should not show the quiz info dialog, it should go directly to upload 
+		verify(mockView, Mockito.times(0)).showQuizInfoDialog(any(CallbackP.class));
+		verify(mockView).showUploadDialog(anyString());
+	}
+	
+	@Test
+	public void testUploadStep2Failure(){
 		AsyncMockStubber.callFailureWith(new Exception("unhandled")).when(mockSynapseClient).getCertifiedUserPassingRecord(anyString(), any(AsyncCallback.class));
-		filesBrowser.uploadButtonClicked();
+		FilesBrowser.uploadButtonClickedStep2(configuredEntityId, mockView, mockSynapseClient, mockCookies, mockAuthenticationController);
 		verify(mockView).showErrorMessage(anyString());
 	}
 	

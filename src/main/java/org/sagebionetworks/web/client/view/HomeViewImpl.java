@@ -250,6 +250,9 @@ public class HomeViewImpl extends Composite implements HomeView {
 		footer.add(footerWidget.asWidget());
 		headerWidget.refresh();
 		showCertificationReminder(false);
+		myProjectsTreeBrowser.clear();
+		favoritesTreeBrowser.clear();
+		teamsListWidget.clear();
 		
 		boolean isLoggedIn = presenter.showLoggedInDetails();
 		
@@ -480,13 +483,12 @@ public class HomeViewImpl extends Composite implements HomeView {
 	@Override
 	public void showCertificationReminder(boolean visible) {
 		if (visible && 
-			DisplayUtils.isInTestWebsite(cookies) && //remove line once internal testing has concluded
 			getDaysRemaining() > 0) {
-			certificationReminderUI.removeClassName("hide");
+			DisplayUtils.show(certificationReminderUI);
 			lockdownDate1.setInnerHTML(LOCKDOWN_DATE_STRING);
 			lockdownDate2.setInnerHTML(LOCKDOWN_DATE_STRING);
 		} else {
-			certificationReminderUI.addClassName("hide");
+			DisplayUtils.hide(certificationReminderUI);
 		}
 	}
 	

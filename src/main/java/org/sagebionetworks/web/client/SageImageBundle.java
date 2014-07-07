@@ -80,14 +80,17 @@ public interface SageImageBundle extends ClientBundle {
 	@Source("images/Sloan_logo.jpg")
 	ImageResource sloanLogo();
 
-	@Source("images/spotlight/Dream85_AD.jpg")
-	ImageResource dream85AD();
+	@Source("images/spotlight/Dream9_AD.png")
+	ImageResource dream9AD();
 	
 	@Source("images/spotlight/Dream85_Banner.jpg")
 	ImageResource dream85Banner();
 	
-	@Source("images/spotlight/Dream85_RA.jpg")
-	ImageResource dream85RA();
+	@Source("images/spotlight/Dream9_AML.png")
+	ImageResource dream9AML();
+	
+	@Source("images/spotlight/Dream9_BROAD.jpg")
+	ImageResource dream9Broad();
 	
 	@Source("images/spotlight/Dream85_SM.jpg")
 	ImageResource dream85SM();
@@ -98,4 +101,6 @@ public interface SageImageBundle extends ClientBundle {
 	@Source("images/certificate.png")
 	ImageResource certificate();
 
+	@Source("images/greyArrow.png")
+	ImageResource greyArrow();
 }

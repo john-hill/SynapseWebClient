@@ -278,13 +278,7 @@ public class SynapseClientImplTest {
 		when(mockSynapse.getEntityHeaderBatch(anyList())).thenReturn(batchHeaders);
 		
 		List<AccessRequirement> accessRequirements= new ArrayList<AccessRequirement>();
-		TermsOfUseAccessRequirement accessRequirement = new TermsOfUseAccessRequirement();
-		accessRequirements.add(accessRequirement);
-		accessRequirement.setEntityType(TermsOfUseAccessRequirement.class.getName());
-		RestrictableObjectDescriptor descriptor = new RestrictableObjectDescriptor();
-		descriptor.setId("101");
-		descriptor.setType(RestrictableObjectType.ENTITY);
-		accessRequirement.setSubjectIds(Arrays.asList(new RestrictableObjectDescriptor[]{descriptor}));
+		accessRequirements.add(createAccessRequirement(ACCESS_TYPE.DOWNLOAD));
 		
 		int mask = ENTITY | ANNOTATIONS | PERMISSIONS | ENTITY_PATH | 
 		HAS_CHILDREN | ACCESS_REQUIREMENTS | UNMET_ACCESS_REQUIREMENTS;
@@ -322,6 +316,7 @@ public class SynapseClientImplTest {
 		ars.setTotalNumberOfResults(0);
 		ars.setResults(new ArrayList<AccessRequirement>());
 		when(mockSynapse.getAccessRequirements(any(RestrictableObjectDescriptor.class))).thenReturn(ars);
+		when(mockSynapse.getUnmetAccessRequirements(any(RestrictableObjectDescriptor.class))).thenReturn(ars);
 		mockEvaluation = Mockito.mock(Evaluation.class);
 		when(mockEvaluation.getStatus()).thenReturn(EvaluationStatus.OPEN);
 		when(mockSynapse.getEvaluation(anyString())).thenReturn(mockEvaluation);
@@ -365,6 +360,17 @@ public class SynapseClientImplTest {
 		sentMessage = new MessageToUser();
 		sentMessage.setId("987");
 		when(mockSynapse.sendStringMessage(any(MessageToUser.class), anyString())).thenReturn(sentMessage);
+	}
+	
+	private AccessRequirement createAccessRequirement(ACCESS_TYPE type) {
+		TermsOfUseAccessRequirement accessRequirement = new TermsOfUseAccessRequirement();
+		accessRequirement.setEntityType(TermsOfUseAccessRequirement.class.getName());
+		RestrictableObjectDescriptor descriptor = new RestrictableObjectDescriptor();
+		descriptor.setId("101");
+		descriptor.setType(RestrictableObjectType.ENTITY);
+		accessRequirement.setSubjectIds(Arrays.asList(new RestrictableObjectDescriptor[]{descriptor}));
+		accessRequirement.setAccessType(type);
+		return accessRequirement;
 	}
 	
 	private void setupTeamInvitations() throws SynapseException{
@@ -1420,30 +1426,45 @@ public class SynapseClientImplTest {
 		verify(mockCache).get(any(MarkdownCacheRequest.class));
 	}
 	
-//	@Test
-//	public void testCreateColumnModelAndAddToTable() throws Exception {
-//		ColumnModel cm = new ColumnModel();
-//		cm.setColumnType(ColumnType.STRING);
-//		cm.setName("one");
-//		String tableId = "syn123";
-//		TableEntity table = new TableEntity();
-//		table.setEntityType(TableEntity.class.getName());
-//		table.setId(tableId);
-//		table.setName("aTable");
-//		List<ColumnModel> models = Arrays.asList(cm);
-//		TableBundle tableData = new TableBundle();
-//		tableData.setColumnModels(models);
-//		tableData.setMaxRowsPerPage(new Long(123));
-//		EntityBundle bundle = new EntityBundle();
-//		bundle.setEntity(table);
-//		bundle.setTableBundle(tableData);
-//		when(mockSynapse.createColumnModel(cm)).thenReturn(cm);
-//		when(mockSynapse.getEntity(tableId, TableEntity.class)).thenReturn(table);
-//		when(mockSynapse.putEntity(any(TableEntity.class))).thenReturn(table);
-//		when(mockSynapse.getEntityBundle(anyString(), anyInt())).thenReturn(bundle);
-//		EntityBundleTransport ebt = synapseClient.createColumnModelAndAddToTable(tableModelUtils.toJSON(table), tableModelUtils.toJSON(cm));
-//		org.sagebionetworks.web.client.model.EntityBundle clone = nodeModelCreator.createEntityBundle(ebt);
-//		assertEquals(bundle.getEntity(), clone.getEntity());
-//		assertEquals(bundle.getTableBundle(), clone.getTableBundle());
-//	}
+	@Test
+	public void testFilterAccessRequirements() throws Exception {
+		List<AccessRequirement> unfilteredAccessRequirements = new ArrayList<AccessRequirement>();
+		List<AccessRequirement> filteredAccessRequirements;
+		//filter empty list should not result in failure
+		filteredAccessRequirements = synapseClient.filterAccessRequirements(unfilteredAccessRequirements, ACCESS_TYPE.UPDATE);
+		assertTrue(filteredAccessRequirements.isEmpty());
+		
+		unfilteredAccessRequirements.add(createAccessRequirement(ACCESS_TYPE.DOWNLOAD));
+		unfilteredAccessRequirements.add(createAccessRequirement(ACCESS_TYPE.SUBMIT));
+		unfilteredAccessRequirements.add(createAccessRequirement(ACCESS_TYPE.SUBMIT));
+		//no requirements of type UPDATE
+		filteredAccessRequirements = synapseClient.filterAccessRequirements(unfilteredAccessRequirements, ACCESS_TYPE.UPDATE);
+		assertTrue(filteredAccessRequirements.isEmpty());
+		//1 download
+		filteredAccessRequirements = synapseClient.filterAccessRequirements(unfilteredAccessRequirements, ACCESS_TYPE.DOWNLOAD);
+		assertEquals(1, filteredAccessRequirements.size());
+		//2 submit
+		filteredAccessRequirements = synapseClient.filterAccessRequirements(unfilteredAccessRequirements, ACCESS_TYPE.SUBMIT);
+		assertEquals(2, filteredAccessRequirements.size());
+		
+		//finally, filter null list - result will be an empty list
+		filteredAccessRequirements = synapseClient.filterAccessRequirements(null, ACCESS_TYPE.SUBMIT);
+		assertNotNull(filteredAccessRequirements);
+		assertTrue(filteredAccessRequirements.isEmpty());
+	}
+	
+	@Test
+	public void testGetEntityUnmetAccessRequirements() throws Exception {
+		//verify it calls getUnmetAccessRequirements when unmet is true
+		synapseClient.getEntityAccessRequirements(entityId, true, null);
+		verify(mockSynapse).getUnmetAccessRequirements(any(RestrictableObjectDescriptor.class));
+	}
+	
+	@Test
+	public void testGetAllEntityAccessRequirements() throws Exception {
+		//verify it calls getAccessRequirements when unmet is false
+		synapseClient.getEntityAccessRequirements(entityId, false, null);
+		verify(mockSynapse).getAccessRequirements(any(RestrictableObjectDescriptor.class));
+	}
+
 }
