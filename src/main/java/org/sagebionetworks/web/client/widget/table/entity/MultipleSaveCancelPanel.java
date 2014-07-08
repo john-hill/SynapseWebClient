@@ -3,6 +3,8 @@ package org.sagebionetworks.web.client.widget.table.entity;
 import java.util.List;
 
 import org.sagebionetworks.web.client.DisplayConstants;
+import org.sagebionetworks.web.client.DisplayUtils;
+import org.sagebionetworks.web.client.DisplayUtils.ButtonType;
 
 import com.google.gwt.safehtml.shared.SafeHtmlUtils;
 import com.google.gwt.user.client.ui.Button;
@@ -35,7 +37,9 @@ public class MultipleSaveCancelPanel extends FlowPanel {
 		// Add each child
 		int index = 0;
 		for(SaveCancelWidget child: children){
-			this.add(createChildContainer(panelId, child, index++));
+			boolean last = index+1 == children.size();
+			this.add(createChildContainer(panelId, child, index, last));
+			index++;
 		}
 	}
 
@@ -45,14 +49,7 @@ public class MultipleSaveCancelPanel extends FlowPanel {
 	 * @param child
 	 * @return
 	 */
-	private FlowPanel createChildContainer(String parentId, SaveCancelWidget child, int index) {
-		
-//		if(true){
-//			FlowPanel childPanel = new FlowPanel();
-//			childPanel.add(new HTML("<h4>"+child.getDispalyName()+"</h4>"));
-//			return childPanel;
-//		}
-		
+	private FlowPanel createChildContainer(String parentId, SaveCancelWidget child, int index, boolean last) {
 		FlowPanel childPanel = new FlowPanel();
 		childPanel.addStyleName("panel panel-default");
 		FlowPanel panelHeading = new FlowPanel();
@@ -61,11 +58,11 @@ public class MultipleSaveCancelPanel extends FlowPanel {
 		String target = parentId+"-"+index;
 		StringBuilder builder = new StringBuilder();
 		builder.append("<h4 class=\"panel-title\">");
-		builder.append("<a data-toggle=\"collapse\" data-parent=\"#").append(parentId).append("\" href=\"#").append(target).append(">");
+		builder.append("<a data-toggle=\"collapse\" data-parent=\"#").append(parentId).append("\" href=\"#").append(target).append("\" class=\"link\">");
 		builder.append(SafeHtmlUtils.fromString(child.getDispalyName()).asString());
 		builder.append("</a>");
 		builder.append("</h4>");
-		HTML panelTitle = new HTML("<h4>"+SafeHtmlUtils.fromString(child.getDispalyName()).asString()+"</h4>");
+		HTML panelTitle = new HTML(builder.toString());
 
 
 		FlowPanel left = new FlowPanel();			
@@ -77,20 +74,22 @@ public class MultipleSaveCancelPanel extends FlowPanel {
 		panelHeading.add(right);
 		
 		//Save
-		Button saveButton = new Button();
-		saveButton.addStyleName("btn-primary margin-right-5");
-		saveButton.setText(DisplayConstants.SAVE_BUTTON_LABEL);
+		Button saveButton = DisplayUtils.createButton(DisplayConstants.SAVE_BUTTON_LABEL, ButtonType.PRIMARY);
+		saveButton.addStyleName("margin-left-5");
 		
-		Button cancelButton = new Button();
-		cancelButton.addStyleName("btn-default margin-right-5");
-		cancelButton.setText("Cancel");
+		Button cancelButton = DisplayUtils.createButton(DisplayConstants.BUTTON_CANCEL, ButtonType.DEFAULT);
+		cancelButton.addStyleName("margin-left-5");
 		
 		right.add(cancelButton);
 		right.add(saveButton);
 		
 		FlowPanel targetPanel = new FlowPanel();
 		targetPanel.getElement().setId(target);
-		targetPanel.addStyleName("panel-collapse collapse in");
+		builder = new StringBuilder("panel-collapse collapse");
+		if(last){
+			builder.append(" in");
+		}
+		targetPanel.addStyleName(builder.toString());
 		childPanel.add(targetPanel);
 		
 		FlowPanel targetPanelBody = new FlowPanel();
