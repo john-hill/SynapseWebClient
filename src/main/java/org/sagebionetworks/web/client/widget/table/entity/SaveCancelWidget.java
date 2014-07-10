@@ -26,24 +26,24 @@ public interface SaveCancelWidget extends IsWidget {
 	
 	/**
 	 * 
-	 * The provided SavableListener is used to communicate when there are changes that can be saved (or canceled).
+	 * The provided ChangeListener is used to communicate when there are changes that can be saved (or canceled).
 	 * @param listener
 	 */
-	public void addEditListener(SavableListener listener);
+	public void addEditListener(ChangeListener listener);
 	
 	/**
-	 * The provided SavableListener is used to communicate when there are changes that can be saved (or canceled).
+	 * The provided EditListener is used to communicate when there are changes that can be saved (or canceled).
 	 *
 	 */
-	public interface SavableListener {
+	public interface ChangeListener {
 		
 		/**
-		 * When isSavable is set to true, the save and cancel buttons will become active.
-		 * When isSavable is set to false, the save and cancel buttons will be hidden.
+		 * When hasChanges is set to true, the save and cancel buttons will become active.
+		 * When hasChanges is set to false, the save and cancel buttons will be hidden.
 		 * 
 		 * @param isEditing
 		 */
-		public void setIsSavableChanges(boolean isSavable);
+		public void setHasChanges(boolean hasChanges);
 	}
 
 }

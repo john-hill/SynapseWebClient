@@ -54,4 +54,36 @@ public interface MultipleSaveCancelView {
 		 */
 		public void onCancel(String subViewId);
 	}
+
+	/**
+	 * Enable the save and cancel buttons.
+	 * @param subViewId
+	 * @param hasChanges
+	 */
+	void enableSaveCancel(String subViewId, boolean hasChanges);
+
+	/**
+	 * Show an info message to the user.
+	 * 
+	 * @param string
+	 */
+	void showInfo(String title, String message);
+
+	/**
+	 * Collapse the given view.
+	 * @param currentViewId
+	 */
+	void collapseView(String currentViewId);
+
+	/**
+	 * Expand the given view.
+	 * @param currentViewId
+	 */
+	void expandView(String currentViewId);
+
+	/**
+	 * Show an error message
+	 * @param string
+	 */
+	void showError(String string);
 }
