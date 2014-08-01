@@ -29,6 +29,7 @@
     <inherits name="org.gwtbootstrap3.extras.positionedtabs.PositionedTabs"/>
     <inherits name="org.gwtbootstrap3.extras.respond.Respond"/>
     <inherits name="org.gwtbootstrap3.extras.growl.Growl"/>
+    <inherits name="org.gwtbootstrap3.extras.tags.Tags"/>
 
 	<!-- Specify the app entry point class. -->
 	<entry-point class='org.sagebionetworks.web.client.Portal' />
@@ -60,8 +61,7 @@
 	<inherits name="org.sagebionetworks.client.synpaseClientExceptions"/>
 	
 	<!-- Limit build permuatations (testing only)  -->
-<!-- 	
+	
 	<set-property name="user.agent" value="safari"/>
-	 --> 
 	
 </module>
