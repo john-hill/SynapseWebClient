@@ -6,6 +6,7 @@ import org.sagebionetworks.repo.model.Locationable;
 import org.sagebionetworks.repo.model.Project;
 import org.sagebionetworks.repo.model.Reference;
 import org.sagebionetworks.repo.model.Versionable;
+import org.sagebionetworks.repo.model.table.TableEntity;
 import org.sagebionetworks.web.client.DisplayConstants;
 import org.sagebionetworks.web.client.DisplayUtils;
 import org.sagebionetworks.web.client.DisplayUtils.ButtonType;
@@ -203,10 +204,15 @@ public class ActionMenuViewImpl extends FlowPanel implements ActionMenuView, Upl
 			addUploadItem(toolsButton, entityBundle, entityType);
 		}
 		
+		// Upload table CSV.
+		if(canEdit && entity instanceof TableEntity){
+			addUploadCSV(toolsButton);
+		}
+		
 		if (canEdit && entity instanceof Versionable) {
 			addSubmitToEvaluationItem(toolsButton, entity, entityType);
 		} 
-		
+				
 		// create link
 		if(authenticated) {
 			addCreateShortcutItem(toolsButton, entity, entityType);
@@ -226,6 +232,17 @@ public class ActionMenuViewImpl extends FlowPanel implements ActionMenuView, Upl
 		}
 		
 		toolsButton.setVisible(toolsButton.getCount() > 0);
+	}
+
+	private void addUploadCSV(DropdownButton toolsButton2) {
+		Anchor a = new Anchor(SafeHtmlUtils.fromSafeConstant(DisplayUtils.getIcon("glyphicon-arrow-up") + " " + DisplayConstants.TEXT_UPLOAD_CSV));
+		a.addClickHandler(new ClickHandler() {			
+			@Override
+			public void onClick(ClickEvent event) {
+				presenter.onUploadCSV();
+			}
+		});
+		toolsButton2.addMenuItem(a);
 	}
 
 	/**

@@ -69,6 +69,11 @@ public interface ActionMenuView extends IsWidget, SynapseView {
 		void uploadToGenomespace();
 		
 		void showAvailableEvaluations();
+
+		/**
+		 * Upload a CSV file to a table.
+		 */
+		void onUploadCSV();
 	}
 
 }

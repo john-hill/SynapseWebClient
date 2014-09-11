@@ -353,5 +353,11 @@ public class ActionMenu implements ActionMenuView.Presenter, SynapseWidgetPresen
 	public void showAvailableEvaluations() {
 		evaluationSubmitter.configure(entityBundle.getEntity(), null);
 	}
+
+	@Override
+	public void onUploadCSV() {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }
